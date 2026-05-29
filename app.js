@@ -54,6 +54,31 @@
   onScroll();
   window.addEventListener("scroll", onScroll, {passive:true});
 
+  /* ---- active nav link (scroll-spy; position-based) ---- */
+  const navSections = Array.prototype.slice
+    .call(document.querySelectorAll(".nav-links a"))
+    .map(function(link){
+      const id = (link.getAttribute("href") || "").replace(/^#/, "");
+      const el = id && document.getElementById(id);
+      return el ? {link:link, el:el} : null;
+    })
+    .filter(Boolean);
+  function setActiveNav(){
+    const trigger = window.innerHeight * 0.3;
+    let current = null;
+    for(let i = 0; i < navSections.length; i++){
+      if(navSections[i].el.getBoundingClientRect().top <= trigger) current = navSections[i];
+    }
+    /* near the bottom, keep the last section active even if it's short */
+    if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 2){
+      current = navSections[navSections.length - 1];
+    }
+    navSections.forEach(function(s){ s.link.classList.toggle("active", s === current); });
+  }
+  setActiveNav();
+  window.addEventListener("scroll", setActiveNav, {passive:true});
+  window.addEventListener("resize", setActiveNav, {passive:true});
+
   /* ---- reveal on scroll (position-based; robust everywhere) ---- */
   const reveals = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
   function checkReveals(){
