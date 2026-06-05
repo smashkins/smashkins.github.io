@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rosanero Community – Concept Vision</title>
+  <style>
+    :root {
+      --bg: #08070b;
+      --bg-soft: #12101a;
+      --panel: rgba(255,255,255,0.075);
+      --panel-strong: rgba(255,255,255,0.12);
+      --pink: #ff4fa3;
+      --pink-2: #ff8ac6;
+      --black: #050408;
+      --text: #f7edf4;
+      --muted: #b8aeb8;
+      --line: rgba(255,255,255,0.14);
+      --green: #65f2b3;
+      --yellow: #ffd166;
+      --red: #ff6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255, 79, 163, .28), transparent 34%),
+        radial-gradient(circle at 85% 10%, rgba(255, 138, 198, .14), transparent 30%),
+        linear-gradient(180deg, #08070b 0%, #100d16 55%, #08070b 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .08;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: screen;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(22px);
+      background: rgba(8, 7, 11, .72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--pink), #111 62%);
+      box-shadow: 0 0 30px rgba(255,79,163,.35);
+      position: relative;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 2px solid rgba(255,255,255,.78);
+      border-radius: 50%;
+    }
+
+    .nav-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 88px 22px 54px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      align-items: center;
+      gap: 58px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--pink-2);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: 22px 0 18px;
+      font-size: clamp(46px, 8vw, 92px);
+      line-height: .92;
+      letter-spacing: -.07em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #fff 12%, var(--pink-2) 47%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      font-size: clamp(19px, 2.2vw, 26px);
+      line-height: 1.38;
+      color: #e7dbe4;
+      max-width: 720px;
+      margin: 0 0 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.07);
+      padding: 12px 16px;
+      border-radius: 999px;
+      color: #f4edf2;
+      font-weight: 650;
+      font-size: 14px;
+    }
+
+    .pill.primary {
+      background: linear-gradient(135deg, var(--pink), #8e245b);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 18px 46px rgba(255,79,163,.28);
+    }
+
+    .phone-stage {
+      min-height: 620px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .halo {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,79,163,.25), transparent 62%);
+      filter: blur(6px);
+    }
+
+    .phone {
+      width: 292px;
+      min-height: 590px;
+      border-radius: 44px;
+      padding: 13px;
+      background: linear-gradient(145deg, rgba(255,255,255,.35), rgba(255,255,255,.05));
+      box-shadow: 0 34px 90px rgba(0,0,0,.58), inset 0 0 0 1px rgba(255,255,255,.25);
+      position: relative;
+      transform: rotate(-3deg);
+    }
+
+    .phone-screen {
+      border-radius: 34px;
+      min-height: 564px;
+      background: linear-gradient(180deg, #15101d, #08070b);
+      overflow: hidden;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .mock-label {
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .app-header {
+      height: 118px;
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, rgba(255,79,163,.85), rgba(12,9,17,.88)),
+        radial-gradient(circle at 80% 10%, rgba(255,255,255,.28), transparent 30%);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .app-title {
+      font-size: 21px;
+      font-weight: 850;
+      letter-spacing: -.03em;
+    }
+
+    .app-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      margin-top: 4px;
+    }
+
+    .group-card, .mini-card {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.075);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .group-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 39px;
+      height: 39px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--pink), #1a1420);
+      flex: 0 0 auto;
+    }
+
+    .group-name {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .verified {
+      color: var(--green);
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .score {
+      padding: 10px 8px;
+      border-radius: 15px;
+      background: rgba(255,255,255,.075);
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .score b {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .disclaimer {
+      max-width: 1180px;
+      margin: 0 auto 34px;
+      padding: 0 22px;
+    }
+
+    .disclaimer-box {
+      border: 1px solid rgba(255, 209, 102, .28);
+      background: rgba(255, 209, 102, .08);
+      border-radius: 24px;
+      padding: 20px 22px;
+      color: #ffe8ae;
+      line-height: 1.55;
+    }
+
+    .section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 78px 22px;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: -.055em;
+    }
+
+    .section p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      min-height: 250px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.045));
+      border-radius: 30px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      right: -70px;
+      top: -70px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,79,163,.12);
+      filter: blur(3px);
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(255,79,163,.18);
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      margin-bottom: 22px;
+    }
+
+    h3 {
+      font-size: 23px;
+      letter-spacing: -.03em;
+      margin: 0 0 10px;
+    }
+
+    .card p {
+      font-size: 15.5px;
+      margin: 0;
+      color: #cbbfca;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .visual-panel {
+      border-radius: 34px;
+      min-height: 420px;
+      background:
+        linear-gradient(145deg, rgba(255,79,163,.16), rgba(255,255,255,.055)),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .leaderboard {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .rank {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .rank-no {
+      width: 30px;
+      height: 30px;
+      border-radius: 11px;
+      background: rgba(255,79,163,.18);
+      display: grid;
+      place-items: center;
+      font-weight: 850;
+      color: var(--pink-2);
+    }
+
+    .bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      margin-top: 7px;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--pink), var(--pink-2));
+    }
+
+    .event-thread {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .event {
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.09);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .minute {
+      color: var(--pink-2);
+      font-weight: 850;
+    }
+
+    .event-title {
+      font-weight: 780;
+    }
+
+    .comments {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .sentiment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .mood {
+      text-align: center;
+      padding: 20px 10px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.075);
+      border: 1px solid rgba(255,255,255,.09);
+    }
+
+    .mood .emoji { font-size: 34px; }
+    .mood .percent {
+      font-size: 28px;
+      font-weight: 850;
+      letter-spacing: -.04em;
+      margin-top: 8px;
+    }
+
+    .collectibles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      aspect-ratio: 1;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.24), transparent 30%),
+        linear-gradient(145deg, rgba(255,79,163,.62), rgba(22,16,28,.96));
+      border: 1px solid rgba(255,255,255,.18);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.28);
+    }
+
+    .badge strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .badge span {
+      display: block;
+      margin-top: 7px;
+      color: rgba(255,255,255,.7);
+      font-size: 12px;
+    }
+
+    .journey {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .step {
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--line);
+      min-height: 142px;
+    }
+
+    .step-num {
+      color: var(--pink-2);
+      font-weight: 850;
+      margin-bottom: 14px;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .final {
+      text-align: center;
+      padding: 92px 22px 110px;
+    }
+
+    .final-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,79,163,.24), transparent 42%),
+        rgba(255,255,255,.055);
+      padding: 56px 28px;
+    }
+
+    .final h2 {
+      font-size: clamp(40px, 6vw, 74px);
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .split { grid-template-columns: 1fr; }
+      .phone-stage { min-height: 540px; }
+      .cards { grid-template-columns: 1fr; }
+      .collectibles { grid-template-columns: repeat(2, 1fr); }
+      .journey { grid-template-columns: 1fr; }
+      .sentiment { grid-template-columns: 1fr; }
+      .nav-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <span>Rosanero Community</span>
+      </div>
+      <div class="nav-note">Concept page · mockup non definitivi</div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Unofficial fan app concept</div>
+        <h1><span class="gradient-text">La casa digitale</span><br/>dei tifosi rosanero.</h1>
+        <p class="lead">Una sezione community pensata per riunire gruppi, fan club e tifosi del Palermo in un ambiente verticale, organizzato e più coinvolgente dei social generalisti.</p>
+        <div class="hero-actions">
+          <div class="pill primary">Gruppi verificati</div>
+          <div class="pill">Pronostici</div>
+          <div class="pill">Pagelle tifosi</div>
+          <div class="pill">Matchday live</div>
+        </div>
+      </div>
+
+      <div class="phone-stage">
+        <div class="halo"></div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="mock-label">Mockup concettuale · grafica non definitiva</div>
+            <div class="app-header">
+              <div class="app-title">Community Rosanero</div>
+              <div class="app-sub">Gruppi, partite, classifiche e tifosi.</div>
+            </div>
+            <div class="group-card">
+              <div class="group-row">
+                <div class="avatar"></div>
+                <div>
+                  <div class="group-name">Old Style Supporters <span class="verified">✓</span></div>
+                  <div class="meta">12.430 iscritti · Gruppo verificato</div>
+                </div>
+              </div>
+              <div class="score-grid">
+                <div class="score"><b>#2</b>Ranking</div>
+                <div class="score"><b>84%</b>Attivi</div>
+                <div class="score"><b>3.2k</b>Pronostici</div>
+              </div>
+            </div>
+            <div class="mini-card">
+              <div class="group-name">Palermo–Bari · Matchday</div>
+              <div class="meta">Thread live, sentiment e votazioni tifosi</div>
+            </div>
+            <div class="mini-card">
+              <div class="group-name">Pagella della tifoseria</div>
+              <div class="meta">Pohjanpalo 8.4 · Ranocchia 7.6 · Allenatore 7.8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="disclaimer">
+      <div class="disclaimer-box">
+        <strong>Nota:</strong> i mockup presenti in questa pagina sono solo esempi illustrativi per spiegare il funzionamento della sezione Community. Non rappresentano la grafica finale dell’app Rosanero, che sarà definita in una fase successiva di design.
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Non un altro Facebook. Un hub verticale per tifosi.</h2>
+        <p>La community non nasce per copiare i social esistenti, ma per aggregare la tifoseria attorno a funzioni specifiche: gruppi verificati, classifiche, attività di matchday, votazioni e collezionabili digitali.</p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="icon">✓</div>
+          <h3>Gruppi verificati</h3>
+          <p>Ogni gruppo già esistente può avere una presenza ufficiale se l’admin reale ne gestisce anche lo spazio in app.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🏆</div>
+          <h3>Competizione sana</h3>
+          <p>Pronostici e votazioni generano classifiche interne ai gruppi e ranking generali tra community.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📊</div>
+          <h3>Dati della tifoseria</h3>
+          <p>Voti, sondaggi e sentiment diventano statistiche aggregate leggibili per tutta la community rosanero.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div>
+          <h2>Gruppi con identità propria.</h2>
+          <p>Ogni gruppo ha logo, header image, descrizione, feed, numero iscritti, admin e moderatori. Il badge verificato indica che il gruppo è gestito da un rappresentante riconosciuto.</p>
+          <p>Questo permette ai gruppi Facebook, alle pagine storiche e ai fan club di avere un secondo canale più verticale e meno dispersivo.</p>
+        </div>
+        <div class="visual-panel">
+          <div class="mock-label">Esempio profilo gruppo · UI non definitiva</div>
+          <div class="app-header">
+            <div class="app-title">Palermo Calcio <span class="verified">✓</span></div>
+            <div class="app-sub">Gruppo verificato · 28.540 iscritti</div>
+          </div>
+          <div class="score-grid">
+            <div class="score"><b>91%</b>Engagement</div>
+            <div class="score"><b>#1</b>Gruppi</div>
+            <div class="score"><b>6.8k</b>Voti</div>
+          </div>
+          <div class="mini-card">
+            <div class="group-name">Admin e moderatori</div>
+            <div class="meta">Moderazione autonoma, regole di gruppo, gestione contenuti.</div>
+          </div>
+          <div class="mini-card">
+            <div class="group-name">Feed del gruppo</div>
+            <div class="meta">Post, discussioni, sondaggi e attività legate alle partite.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div class="visual-panel">
+          <div class="mock-label">Classifiche esempio · dati fittizi</div>
+          <h3>Classifica gruppi</h3>
+          <div class="leaderboard">
+            <div class="rank">
+              <div class="rank-no">1</div>
+              <div>
+                <b>Palermo Calcio</b>
+                <div class="bar"><span style="width:92%"></span></div>
+              </div>
+              <div>92.4</div>
+            </div>
+            <div class="rank">
+              <div class="rank-no">2</div>
+              <div>
+                <b>Old Style Supporters</b>
+                <div class="bar"><span style="width:86%"></span></div>
+              </div>
+              <div>86.1</div>
+            </div>
+            <div class="rank">
+              <div class="rank-no">3</div>
+              <div>
+                <b>Palermo Club Milano</b>
+                <div class="bar"><span style="width:81%"></span></div>
+              </div>
+              <div>81.7</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2>Pronostici, MVP e classifiche.</h2>
+          <p>Prima di ogni partita gli utenti possono pronosticare risultato, primo marcatore e MVP. I punti alimentano classifiche individuali, classifiche interne al gruppo e ranking generali tra gruppi.</p>
+          <p>Per evitare che vincano solo i gruppi più grandi, il ranking può basarsi su medie ponderate, partecipazione e qualità dei risultati.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Sondaggi avanzati e pagelle della tifoseria.</h2>
+        <p>Dopo ogni partita, i tifosi votano giocatori, allenatore, squadra, mercato e decisioni chiave. L’app genera automaticamente pagelle e statistiche confrontabili tra community generale e singoli gruppi.</p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="icon">⭐</div>
+          <h3>Voto giocatori</h3>
+          <p>Media voto, numero votanti, andamento stagionale e differenze tra gruppi.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🧠</div>
+          <h3>Giudizio allenatore</h3>
+          <p>Gradimento tecnico e sentiment sulle scelte tattiche dopo ogni partita.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📈</div>
+          <h3>Statistiche aggregate</h3>
+          <p>La voce della tifoseria diventa un contenuto unico, leggibile e condivisibile.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div>
+          <h2>Matchday live senza chat ingestibile.</h2>
+          <p>La chat libera durante la partita può diventare caotica. Per questo la Matchday Experience usa thread automatici sugli eventi principali: goal, cambi, ammonizioni, occasioni, VAR e fine partita.</p>
+          <p>Ogni evento ha una mini-discussione dedicata. Il live resta leggibile e le conversazioni non si perdono in un flusso continuo.</p>
+        </div>
+        <div class="visual-panel">
+          <div class="mock-label">Thread evento · esempio</div>
+          <h3>Palermo–Bari Live</h3>
+          <div class="event-thread">
+            <div class="event">
+              <div class="minute">37’</div>
+              <div>
+                <div class="event-title">⚽ Goal Palermo</div>
+                <div class="comments">248 commenti nel thread</div>
+              </div>
+              <div>→</div>
+            </div>
+            <div class="event">
+              <div class="minute">61’</div>
+              <div>
+                <div class="event-title">🔄 Cambio Palermo</div>
+                <div class="comments">96 commenti nel thread</div>
+              </div>
+              <div>→</div>
+            </div>
+            <div class="event">
+              <div class="minute">78’</div>
+              <div>
+                <div class="event-title">❌ Occasione mancata</div>
+                <div class="comments">183 commenti nel thread</div>
+              </div>
+              <div>→</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div class="visual-panel">
+          <div class="mock-label">Sentiment live · esempio</div>
+          <h3>Umore della tifoseria</h3>
+          <div class="sentiment">
+            <div class="mood">
+              <div class="emoji">😀</div>
+              <div class="percent">62%</div>
+              <div class="meta">Entusiasmo</div>
+            </div>
+            <div class="mood">
+              <div class="emoji">😐</div>
+              <div class="percent">21%</div>
+              <div class="meta">Attesa</div>
+            </div>
+            <div class="mood">
+              <div class="emoji">😡</div>
+              <div class="percent">17%</div>
+              <div class="meta">Frustrazione</div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="group-name">Confronto gruppi</div>
+            <div class="meta">Il sentiment può essere visto per tutta la community o per singolo gruppo.</div>
+          </div>
+        </div>
+        <div>
+          <h2>Sentiment live della community.</h2>
+          <p>Durante la partita gli utenti possono esprimere rapidamente l’umore del momento. L’app mostra un indicatore aggregato, utile per capire come la tifoseria sta vivendo la gara.</p>
+          <p>Il dato può essere generale o filtrato per gruppo, creando una narrazione live più ordinata e meno rumorosa.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Collezionabili digitali e punti esperienza.</h2>
+        <p>I collezionabili community convivono con quelli ufficiali dell’app. Presenze, trasferte, abbonamenti, attività, pronostici e traguardi aumentano XP e alimentano classifiche stagionali.</p>
+      </div>
+
+      <div class="collectibles">
+        <div class="badge"><div><strong>Presente allo stadio</strong><span>Matchday badge</span></div></div>
+        <div class="badge"><div><strong>Trasferta rosanero</strong><span>Esperienza</span></div></div>
+        <div class="badge"><div><strong>Top pronosticatore</strong><span>Community</span></div></div>
+        <div class="badge"><div><strong>Fondatore gruppo</strong><span>Identità</span></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Il percorso del tifoso.</h2>
+        <p>La Community diventa parte di un ecosistema più ampio: il tifoso segue il Palermo, entra nei gruppi, partecipa alle partite, vota, colleziona badge e scala le classifiche.</p>
+      </div>
+
+      <div class="journey">
+        <div class="step">
+          <div class="step-num">01</div>
+          <b>Scopre i gruppi</b>
+          <span>Trova community verificate e fan club rosanero.</span>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <b>Si iscrive</b>
+          <span>Entra nel gruppo e segue il feed dedicato.</span>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <b>Partecipa</b>
+          <span>Commenta, vota, pronostica e vive il matchday.</span>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <b>Guadagna XP</b>
+          <span>Ottiene badge, punti e risultati personali.</span>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <b>Rappresenta</b>
+          <span>Contribuisce alla classifica del proprio gruppo.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="final-inner">
+        <div class="eyebrow">Visione prodotto</div>
+        <h2>Rosanero Community può diventare il punto di ritrovo digitale della tifoseria.</h2>
+        <p>Un luogo unico dove informarsi, partecipare, competere, votare e vivere il Palermo insieme ad altri tifosi.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Rosanero Community · Concept page · Mockup e dati puramente illustrativi
+  </footer>
+</body>
+</html>
