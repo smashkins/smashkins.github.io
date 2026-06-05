@@ -115,9 +115,7 @@
   .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
   .brand{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-weight:900;letter-spacing:-0.01em;font-size:18px;}
   .brand .mark{
-    width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
-    background:conic-gradient(from 220deg, var(--pink), var(--pink-neon), var(--gold), var(--pink));
-    color:#1a0411;font-family:var(--font-cond);font-weight:800;font-size:18px;
+    width:38px;height:38px;border-radius:10px;display:block;object-fit:cover;flex:none;
     box-shadow:0 0 22px -4px var(--pink-neon);
   }
   .brand small{display:block;font-family:var(--font-cond);font-weight:600;font-size:11px;letter-spacing:0.18em;color:var(--muted-2);text-transform:uppercase;}
@@ -448,7 +446,7 @@
 <header class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="#top">
-      <span class="mark">R</span>
+      <img class="mark" src="assets/rosanero-logo.jpg" alt="Rosanero" />
       <span>Rosanero<small>Community · Concept</small></span>
     </a>
     <nav class="nav-links">
@@ -561,7 +559,7 @@
     <div class="section-head reveal">
       <span class="eyebrow cyan">Gruppi verificati</span>
       <h2>Ogni fan club diventa <span class="grad-text">ufficiale in app</span></h2>
-      <p>Ogni gruppo Facebook o fan club esistente può avere una presenza ufficiale: basta che l'admin reale del gruppo diventi anche admin del gruppo Rosanero.</p>
+      <p>Ogni gruppo Facebook o fan club esistente può avere una presenza ufficiale: basta che l'admin reale del gruppo si verifichi all'interno della app Rosanero.</p>
     </div>
     <div class="card-grid cols-3">
       <div class="card group-card reveal">
@@ -877,7 +875,7 @@
 <footer>
   <div class="wrap">
     <div class="footer-top">
-      <a class="brand" href="#top"><span class="mark">R</span><span>Rosanero<small>Community · Concept</small></span></a>
+      <a class="brand" href="#top"><img class="mark" src="assets/rosanero-logo.jpg" alt="Rosanero" /><span>Rosanero<small>Community · Concept</small></span></a>
       <nav class="nav-links" style="display:flex;flex-wrap:wrap;gap:24px;">
         <a href="#soluzione">Soluzione</a>
         <a href="#gruppi">Gruppi</a>
