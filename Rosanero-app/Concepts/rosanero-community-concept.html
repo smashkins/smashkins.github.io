@@ -34,7 +34,7 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
   body{
     font-family:var(--font-body);
     background:var(--bg);
@@ -386,10 +386,10 @@
   .xp-track{height:10px;border-radius:100px;background:rgba(255,255,255,0.08);margin:20px 0 8px;overflow:hidden;}
   .xp-track i{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,var(--pink-neon),var(--gold));transition:width 1.6s ease;}
   .xp-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-2);font-family:var(--font-cond);letter-spacing:0.08em;text-transform:uppercase;}
-  .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;}
-  .profile-stats .ps{border:1px solid var(--line);border-radius:13px;padding:16px;text-align:center;background:rgba(255,255,255,0.02);}
+  .profile-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px;}
+  .profile-stats .ps{min-width:0;border:1px solid var(--line);border-radius:13px;padding:16px;text-align:center;background:rgba(255,255,255,0.02);}
   .profile-stats .ps b{display:block;font-family:var(--font-cond);font-weight:800;font-size:26px;color:var(--ink);}
-  .profile-stats .ps span{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted-2);}
+  .profile-stats .ps span{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted-2);overflow-wrap:anywhere;}
 
   /* ---------- ADMIN BENEFITS ---------- */
   .benefit{display:flex;gap:14px;align-items:flex-start;padding:20px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--card-2),var(--card));transition:.25s;}
