@@ -1,0 +1,27 @@
+---
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<button class="to-top" aria-label={label} title={label} data-to-top>
+  <span aria-hidden="true">↑</span>
+</button>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-to-top]');
+  if (btn) {
+    const onScroll = () => {
+      btn.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.8);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    btn.addEventListener('click', () => {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  }
+</script>

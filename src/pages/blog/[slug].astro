@@ -5,6 +5,7 @@ import BlogLayout from '~/layouts/BlogLayout.astro';
 import PostMeta from '~/components/PostMeta.astro';
 import PostTOC from '~/components/PostTOC.astro';
 import RelatedPosts from '~/components/RelatedPosts.astro';
+import ToTop from '~/components/ToTop.astro';
 import { getPosts, slugOf, tagSlug, getRelatedPosts, type BlogEntry } from '~/utils/blog';
 import { t, localizedHref, type Locale } from '~/i18n';
 
@@ -133,4 +134,6 @@ const hero = entry.data.image;
       </nav>
     )}
   </article>
+
+  <ToTop label={strings.blog.toTop} />
 </BlogLayout>
