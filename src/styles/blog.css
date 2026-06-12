@@ -161,10 +161,15 @@
   align-items: baseline;
   padding: clamp(26px, 3.2vw, 40px) 0;
   border-bottom: 1px solid var(--line);
-  transition: padding-left 0.5s var(--ease);
 }
-.post-card:hover {
-  padding-left: 16px;
+/* hover slide via transform on the children (not padding): transforms don't
+   reflow the grid, so the title never rewraps mid-hover; the hairline rule
+   stays put while the content glides */
+.post-card > :not(.post-card__link) {
+  transition: transform 0.5s var(--ease);
+}
+.post-card:hover > :not(.post-card__link) {
+  transform: translateX(16px);
 }
 .post-card__link {
   position: absolute;
