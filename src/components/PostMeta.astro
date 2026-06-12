@@ -1,0 +1,27 @@
+---
+import { type Locale } from '~/i18n';
+
+export interface Props {
+  date: Date;
+  locale: Locale;
+  readingTime?: number;
+  minReadLabel?: string;
+}
+
+const { date, locale, readingTime, minReadLabel } = Astro.props;
+
+const dateLocale = locale === 'it' ? 'it-IT' : 'en-GB';
+const formatted = date
+  .toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })
+  .toUpperCase();
+---
+
+<span class="post-meta">
+  <time datetime={date.toISOString()}>{formatted}</time>
+  {readingTime ? (
+    <>
+      <span class="post-meta__sep">·</span>
+      <span>{readingTime} {minReadLabel}</span>
+    </>
+  ) : null}
+</span>

@@ -1,0 +1,46 @@
+---
+import { type Locale, t } from '~/i18n';
+
+export interface Props {
+  prevUrl?: string;
+  nextUrl?: string;
+  currentPage: number;
+  lastPage: number;
+  locale: Locale;
+}
+
+const { prevUrl, nextUrl, currentPage, lastPage, locale } = Astro.props;
+const strings = t(locale);
+---
+
+{lastPage > 1 && (
+  <nav class="blog-pagination" aria-label="Pagination">
+    {prevUrl ? (
+      <a class="blog-pagination__row blog-pagination__row--prev" href={prevUrl}>
+        <span class="blog-pagination__arrow" aria-hidden="true">←</span>
+        <span>{strings.blog.prev}</span>
+      </a>
+    ) : (
+      <span class="blog-pagination__row blog-pagination__row--prev is-disabled">
+        <span class="blog-pagination__arrow" aria-hidden="true">←</span>
+        <span>{strings.blog.prev}</span>
+      </span>
+    )}
+
+    <span class="blog-pagination__count">
+      {strings.blog.page} {String(currentPage).padStart(2, '0')} / {String(lastPage).padStart(2, '0')}
+    </span>
+
+    {nextUrl ? (
+      <a class="blog-pagination__row blog-pagination__row--next" href={nextUrl}>
+        <span>{strings.blog.next}</span>
+        <span class="blog-pagination__arrow" aria-hidden="true">→</span>
+      </a>
+    ) : (
+      <span class="blog-pagination__row blog-pagination__row--next is-disabled">
+        <span>{strings.blog.next}</span>
+        <span class="blog-pagination__arrow" aria-hidden="true">→</span>
+      </span>
+    )}
+  </nav>
+)}

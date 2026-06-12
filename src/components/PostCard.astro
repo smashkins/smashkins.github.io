@@ -1,0 +1,40 @@
+---
+import { type Locale, localizedHref } from '~/i18n';
+import { slugOf, tagSlug, type BlogEntry } from '~/utils/blog';
+import PostMeta from '~/components/PostMeta.astro';
+
+export interface Props {
+  entry: BlogEntry;
+  locale: Locale;
+}
+
+const { entry, locale } = Astro.props;
+const slug = slugOf(entry);
+const href = localizedHref(`/blog/${slug}/`, locale);
+const tags = entry.data.tags.slice(0, 3);
+---
+
+<article class="post-card">
+  <a class="post-card__link" href={href} aria-label={entry.data.title}></a>
+  <div class="post-card__date">
+    <PostMeta date={entry.data.publishDate} locale={locale} />
+  </div>
+  <div class="post-card__body">
+    <h2 class="post-card__title">{entry.data.title}</h2>
+    <p class="post-card__excerpt">{entry.data.excerpt}</p>
+  </div>
+  <div class="post-card__aside">
+    {tags.length > 0 && (
+      <ul class="post-card__tags">
+        {tags.map((tag) => (
+          <li>
+            <a href={localizedHref(`/blog/tags/${tagSlug(tag)}/`, locale)} class="tag-chip">
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+    <span class="post-card__arrow" aria-hidden="true">→</span>
+  </div>
+</article>

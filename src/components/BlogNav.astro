@@ -1,0 +1,33 @@
+---
+import { type Locale, t, switchLocalePath } from '~/i18n';
+
+export interface Props {
+  locale: Locale;
+  /** Override the switcher hrefs (e.g. a post page falling back to the blog
+   *  index when no sibling-locale translation exists). */
+  switchEn?: string;
+  switchIt?: string;
+}
+
+const { locale, switchEn, switchIt } = Astro.props;
+const strings = t(locale);
+
+const blogHref = locale === 'it' ? '/it/blog/' : '/blog/';
+const homeHref = locale === 'it' ? '/it/' : '/';
+
+const enPath = switchEn ?? switchLocalePath(Astro.url.pathname, 'en');
+const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
+---
+
+<nav class="blog-nav">
+  <a class="blog-nav__brand" href={homeHref}>MONOIDX</a>
+  <div class="blog-nav__links">
+    <a href={blogHref}>{strings.nav.blog}</a>
+    <a href="/MONOIDX.html">{strings.nav.classic}</a>
+    <span class="blog-nav__switch">
+      <a href={enPath} class={locale === 'en' ? 'is-active' : undefined} hreflang="en">EN</a>
+      <span class="blog-nav__sep">/</span>
+      <a href={itPath} class={locale === 'it' ? 'is-active' : undefined} hreflang="it">IT</a>
+    </span>
+  </div>
+</nav>

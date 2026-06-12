@@ -1,0 +1,32 @@
+---
+import { type Locale, t, localizedHref } from '~/i18n';
+import { slugOf, type BlogEntry } from '~/utils/blog';
+import PostMeta from '~/components/PostMeta.astro';
+
+export interface Props {
+  posts: BlogEntry[];
+  locale: Locale;
+}
+
+const { posts, locale } = Astro.props;
+const strings = t(locale);
+---
+
+{posts.length > 0 && (
+  <section class="related">
+    <p class="eyebrow related__label">{strings.blog.relatedPosts}</p>
+    <ul class="related__list">
+      {posts.map((post) => (
+        <li class="related__row">
+          <a href={localizedHref(`/blog/${slugOf(post)}/`, locale)} class="related__link">
+            <span class="related__date">
+              <PostMeta date={post.data.publishDate} locale={locale} />
+            </span>
+            <span class="related__title">{post.data.title}</span>
+            <span class="related__arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

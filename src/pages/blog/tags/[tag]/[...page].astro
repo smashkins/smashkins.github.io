@@ -1,0 +1,59 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BlogLayout from '~/layouts/BlogLayout.astro';
+import PostCard from '~/components/PostCard.astro';
+import Pagination from '~/components/Pagination.astro';
+import { getPosts, tagSlug, type BlogEntry } from '~/utils/blog';
+import { t, type Locale } from '~/i18n';
+
+const LOCALE: Locale = 'en';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts('en');
+
+  const tagMap = new Map<string, { label: string; posts: BlogEntry[] }>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = tagSlug(tag);
+      if (!tagMap.has(slug)) tagMap.set(slug, { label: tag, posts: [] });
+      tagMap.get(slug)!.posts.push(post);
+    }
+  }
+
+  return [...tagMap.entries()].flatMap(([slug, { label, posts: tagged }]) =>
+    paginate(tagged, {
+      params: { tag: slug },
+      props: { tagLabel: label },
+      pageSize: 8,
+    })
+  );
+}) satisfies GetStaticPaths;
+
+const { page, tagLabel } = Astro.props as { page: Page<BlogEntry>; tagLabel: string };
+const strings = t(LOCALE);
+---
+
+<BlogLayout
+  title={`${strings.blog.taggedWith} ${tagLabel} · MONOIDX`}
+  description={`${strings.blog.taggedWith} ${tagLabel}`}
+  locale={LOCALE}
+>
+  <header class="blog-header">
+    <p class="eyebrow">{strings.blog.eyebrow}</p>
+    <h1 class="blog-header__title">{strings.blog.taggedWith} {tagLabel}</h1>
+  </header>
+
+  <div class="post-list">
+    {page.data.map((entry) => (
+      <PostCard entry={entry} locale={LOCALE} />
+    ))}
+  </div>
+
+  <Pagination
+    prevUrl={page.url.prev}
+    nextUrl={page.url.next}
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+    locale={LOCALE}
+  />
+</BlogLayout>

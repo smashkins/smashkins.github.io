@@ -1,0 +1,48 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import BlogNav from '~/components/BlogNav.astro';
+import { type Locale } from '~/i18n';
+import '~/styles/blog.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  locale: Locale;
+  switchEn?: string;
+  switchIt?: string;
+}
+
+const { title, description, canonical, ogImage, locale, switchEn, switchIt } = Astro.props;
+const lang = locale === 'it' ? 'it' : 'en';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  ogImage={ogImage}
+  lang={lang}
+  bodyClass="blog-edition"
+>
+  <slot name="head" slot="head" />
+
+  <BlogNav locale={locale} switchEn={switchEn} switchIt={switchIt} />
+
+  <main class="blog-main">
+    <div class="wrap">
+      <slot />
+    </div>
+  </main>
+
+  <footer class="blog-footer">
+    <div class="wrap blog-footer__grid">
+      <div>
+        <div class="blog-footer__word">MONOIDX</div>
+        <div class="blog-footer__tag">Built for autonomous operations.</div>
+      </div>
+      <div class="blog-footer__meta">MX-1 · UNIT-07<br />© 2026 — ALL SYSTEMS NOMINAL<br />monoidx.dev</div>
+    </div>
+  </footer>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import '~/styles/blog.css';
+---
+
+<BaseLayout title="Signal Lost — 404 · MONOIDX" description="The requested signal could not be located." bodyClass="blog-edition">
+  <main class="notfound">
+    <div class="wrap notfound__inner">
+      <p class="eyebrow">Error — 404</p>
+      <h1 class="notfound__title">Signal Lost</h1>
+      <p class="notfound__copy">The coordinates you requested return no signal. The unit may have been relocated or decommissioned.</p>
+      <div class="notfound__links">
+        <a class="notfound__row" href="/">
+          <span>Back to home</span>
+          <span class="notfound__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="notfound__row" href="/blog/">
+          <span>Open the blog</span>
+          <span class="notfound__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,94 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+export interface Props {
+  headings: MarkdownHeading[];
+  label: string;
+  variant: 'mobile' | 'desktop';
+}
+
+const { headings, label, variant } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length > 0 && variant === 'mobile' && (
+    <details class="post-toc post-toc--mobile">
+      <summary>{label}</summary>
+      <ol class="post-toc__list">
+        {items.map((h, i) => (
+          <li class={`post-toc__item post-toc__item--d${h.depth}`}>
+            <a href={`#${h.slug}`} data-toc-link={h.slug}>
+              <span class="post-toc__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="post-toc__text">{h.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
+}
+
+{
+  items.length > 0 && variant === 'desktop' && (
+    <aside class="post-toc post-toc--desktop" aria-label={label}>
+      <p class="post-toc__label">{label}</p>
+      <ol class="post-toc__list">
+        {items.map((h, i) => (
+          <li class={`post-toc__item post-toc__item--d${h.depth}`}>
+            <a href={`#${h.slug}`} data-toc-link={h.slug}>
+              <span class="post-toc__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="post-toc__text">{h.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  )
+}
+
+<script>
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
+  if (links.length > 0) {
+    const slugs: string[] = [];
+    const seen = new Set<string>();
+    links.forEach((link) => {
+      const slug = link.dataset.tocLink!;
+      if (!seen.has(slug)) {
+        seen.add(slug);
+        slugs.push(slug);
+      }
+    });
+
+    const setActive = (slug: string | null) => {
+      links.forEach((link) => {
+        if (slug && link.dataset.tocLink === slug) {
+          link.setAttribute('data-active', '');
+        } else {
+          link.removeAttribute('data-active');
+        }
+      });
+    };
+
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.id;
+          if (entry.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        });
+        const firstVisible = slugs.find((id) => visible.has(id));
+        if (firstVisible) setActive(firstVisible);
+      },
+      { rootMargin: '-80px 0px -65% 0px', threshold: 0 }
+    );
+
+    slugs.forEach((slug) => {
+      const el = document.getElementById(slug);
+      if (el) observer.observe(el);
+    });
+
+    if (slugs[0]) setActive(slugs[0]);
+  }
+</script>

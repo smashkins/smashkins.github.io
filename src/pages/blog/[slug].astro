@@ -1,0 +1,136 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BlogLayout from '~/layouts/BlogLayout.astro';
+import PostMeta from '~/components/PostMeta.astro';
+import PostTOC from '~/components/PostTOC.astro';
+import RelatedPosts from '~/components/RelatedPosts.astro';
+import { getPosts, slugOf, tagSlug, getRelatedPosts, type BlogEntry } from '~/utils/blog';
+import { t, localizedHref, type Locale } from '~/i18n';
+
+const LOCALE: Locale = 'en';
+const OTHER: Locale = 'it';
+
+// NOTE: /blog/[slug] and /blog/[...page] can collide for a post slugged like a
+// bare number (e.g. "2"). Avoid numeric-only slugs for posts.
+export const getStaticPaths = (async () => {
+  const posts = await getPosts('en');
+  return posts.map((entry) => ({
+    params: { slug: slugOf(entry) },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props as { entry: BlogEntry };
+const strings = t(LOCALE);
+
+const { Content, headings, remarkPluginFrontmatter } = await render(entry);
+const readingTime: number | undefined = remarkPluginFrontmatter?.readingTime;
+
+const allPosts = await getPosts(LOCALE);
+const related = getRelatedPosts(entry, allPosts, 3);
+
+const slug = slugOf(entry);
+
+// Chronological neighbors (allPosts is newest-first).
+const index = allPosts.findIndex((p) => p.id === entry.id);
+const newer = index > 0 ? allPosts[index - 1] : undefined;
+const older = index >= 0 && index < allPosts.length - 1 ? allPosts[index + 1] : undefined;
+
+// Language switcher: does the sibling-locale entry exist?
+const otherPosts = await getPosts(OTHER);
+const sibling = otherPosts.find((p) => slugOf(p) === slug);
+const otherHref = sibling
+  ? localizedHref(`/blog/${slug}/`, OTHER)
+  : localizedHref('/blog/', OTHER);
+
+const tocLabel = strings.blog.contents;
+const hero = entry.data.image;
+---
+
+<BlogLayout
+  title={`${entry.data.title} · MONOIDX`}
+  description={entry.data.excerpt}
+  ogImage={hero}
+  locale={LOCALE}
+  switchIt={otherHref}
+>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={new URL(`/blog/${slug}/`, Astro.site).href} />
+    {sibling && (
+      <link rel="alternate" hreflang="it" href={new URL(`/it/blog/${slug}/`, Astro.site).href} />
+    )}
+    <meta property="og:type" content="article" />
+  </Fragment>
+
+  <a class="post-back" href={localizedHref('/blog/', LOCALE)}>
+    <span class="post-back__arrow" aria-hidden="true">←</span>
+    <span>{strings.blog.backToBlog}</span>
+  </a>
+
+  <article class="post">
+    <header class="post-head">
+      <p class="eyebrow post-head__eyebrow">
+        <PostMeta
+          date={entry.data.publishDate}
+          locale={LOCALE}
+          readingTime={readingTime}
+          minReadLabel={strings.blog.minRead}
+        />
+      </p>
+      <h1 class="post-head__title">{entry.data.title}</h1>
+
+      {entry.data.tags.length > 0 && (
+        <ul class="post-head__tags">
+          {entry.data.tags.map((tag) => (
+            <li>
+              <a href={localizedHref(`/blog/tags/${tagSlug(tag)}/`, LOCALE)} class="tag-chip">
+                {tag}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {entry.data.updateDate && (
+        <p class="post-head__updated">
+          {strings.blog.updated} <PostMeta date={entry.data.updateDate} locale={LOCALE} />
+        </p>
+      )}
+    </header>
+
+    {hero && (
+      <figure class="post-hero">
+        <img src={hero} alt={entry.data.title} loading="eager" />
+      </figure>
+    )}
+
+    <PostTOC headings={headings} label={tocLabel} variant="mobile" />
+
+    <div class="post-grid">
+      <div class="post-body">
+        <Content />
+      </div>
+      <PostTOC headings={headings} label={tocLabel} variant="desktop" />
+    </div>
+
+    <RelatedPosts posts={related} locale={LOCALE} />
+
+    {(newer || older) && (
+      <nav class="post-nav" aria-label="Post navigation">
+        {older ? (
+          <a class="post-nav__row post-nav__row--prev" href={localizedHref(`/blog/${slugOf(older)}/`, LOCALE)}>
+            <span class="post-nav__dir"><span class="post-nav__arrow" aria-hidden="true">←</span>{strings.blog.prev}</span>
+            <span class="post-nav__title">{older.data.title}</span>
+          </a>
+        ) : <span class="post-nav__row is-empty"></span>}
+        {newer ? (
+          <a class="post-nav__row post-nav__row--next" href={localizedHref(`/blog/${slugOf(newer)}/`, LOCALE)}>
+            <span class="post-nav__dir">{strings.blog.next}<span class="post-nav__arrow" aria-hidden="true">→</span></span>
+            <span class="post-nav__title">{newer.data.title}</span>
+          </a>
+        ) : <span class="post-nav__row is-empty"></span>}
+      </nav>
+    )}
+  </article>
+</BlogLayout>
