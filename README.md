@@ -101,7 +101,13 @@ site for this repo. There are two deploy workflows, one per branch:
 | Branch    | Workflow name                              | File                          |
 |-----------|--------------------------------------------|-------------------------------|
 | `main`    | **Deploy to GitHub Pages**                 | `.github/workflows/deploy.yml` (on `main`) |
-| `landing` | **Deploy landing (Astro) to GitHub Pages** | `.github/workflows/deploy.yml` (on `landing`) |
+| `landing` | **Deploy landing (Astro) to GitHub Pages** | `.github/workflows/deploy-landing.yml` (on `landing`) |
+
+The two files **must have different paths**: GitHub keys a workflow's
+identity — including its enabled/disabled state — by file path, repo-wide
+across branches. When both branches used `deploy.yml`, disabling `main`'s
+workflow also silently suppressed `landing`'s (pushes triggered nothing,
+no run, no error). Hence the distinct `deploy-landing.yml` name.
 
 Each builds Astro and publishes `dist/` to Pages. **Exactly one of these
 workflows may be enabled at a time** — see Gotcha 1.
