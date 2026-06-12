@@ -338,7 +338,9 @@
 /* layout grid: body + sticky toc */
 .post-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0,…): a bare 1fr track has min-content as its floor, so a wide
+     code block stretches the column past the viewport on mobile */
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(40px, 5vw, 72px);
 }
 
@@ -350,6 +352,8 @@
   line-height: 1.7;
   color: var(--txt-2);
   max-width: 720px;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 .post-body > * + * {
   margin-top: 1.5em;
