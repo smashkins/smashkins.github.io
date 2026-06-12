@@ -1,8 +1,8 @@
 name: Deploy site (Astro) to GitHub Pages
 
-# Keep this file's path distinct from .github/workflows/deploy.yml — that
-# path is disabled_manually repo-wide (it's the aeon-portfolio branch's
-# workflow), and GitHub keys workflow state by path across all branches.
+# Do not rename this file to deploy.yml: GitHub keys workflow state by file
+# path, and that path carries a disabled_manually registration from a
+# now-deleted legacy workflow — reusing it would suppress this one.
 on:
   push:
     branches:

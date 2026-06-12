@@ -1,21 +1,13 @@
-# MONOIDX landing + bilingual blog (`main` branch)
+# MONOIDX — landing + bilingual blog
 
 A lean **Astro** project that builds the **https://monoidx.dev** site: the
 scroll-driven "MONOIDX — Sequence" landing page (GSAP + canvas frame sequence)
 as the homepage, plus a MONOIDX-styled **bilingual blog** at `/blog` (EN) and
 `/it/blog` (IT).
 
-The previous `main` — an independent AstroWind-based ("Aeon") portfolio site
-in a different visual style — is preserved on the **`aeon-portfolio`** branch.
-The two histories are unrelated (orphan siblings); they are separate sites for
-the **same** Pages domain, and only one may publish at a time (see
-**Deployment**).
-
-> **No longer "served verbatim."** This branch used to be plain static files
-> served directly by Pages. It is now an Astro project: GitHub Actions runs
-> `npm run build` and publishes the generated **`dist/`** folder. The custom
-> domain (`CNAME`) and `.nojekyll` now live in **`public/`** and ride into
-> `dist/` on every build.
+GitHub Actions runs `npm run build` on every push to `main` and publishes the
+generated **`dist/`** folder to GitHub Pages. The custom domain (`CNAME`) and
+`.nojekyll` live in **`public/`** and ride into `dist/` on every build.
 
 ---
 
@@ -96,41 +88,10 @@ from the post's `h2`/`h3` headings.
 
 ## Deployment
 
-**Both site variants now deploy via GitHub Actions** to the **single** Pages
-site for this repo. There are two deploy workflows, one per branch:
-
-| Branch           | Workflow name                           | File                          |
-|------------------|-----------------------------------------|-------------------------------|
-| `main`           | **Deploy site (Astro) to GitHub Pages** | `.github/workflows/deploy-landing.yml` (on `main`) |
-| `aeon-portfolio` | **Deploy to GitHub Pages** (disabled)   | `.github/workflows/deploy.yml` (on `aeon-portfolio`) |
-
-The two files **must have different paths**: GitHub keys a workflow's
-identity — including its enabled/disabled state — by file path, repo-wide
-across branches. When both branches used `deploy.yml`, disabling one
-silently suppressed the other (pushes triggered nothing — no run, no
-error). Hence the distinct `deploy-landing.yml` path; do **not** rename it
-back to `deploy.yml` while that path's workflow is disabled.
-
-Each builds Astro and publishes `dist/` to Pages. **Exactly one of these
-workflows may be enabled at a time** — see Gotcha 1.
-
-### One-time setup
-
-1. **Settings → Pages → Build and deployment → Source → GitHub Actions.**
-   (Both branches publish via Actions now; there is no "Deploy from a branch"
-   step anymore.) — already done.
-2. **Keep the inactive branch's workflow disabled.** The Aeon site's
-   **"Deploy to GitHub Pages"** workflow is disabled while this site is live.
-
-### Publish / switch
-
-- Push to `main` (or **Actions → "Deploy site (Astro) to GitHub Pages"
-  → Run workflow**) to build and publish this site.
-- To switch the live site to the Aeon portfolio: re-enable **"Deploy to
-  GitHub Pages"**, disable **"Deploy site (Astro) to GitHub Pages"**, then
-  run the Aeon workflow manually with the `aeon-portfolio` ref (its `push`
-  trigger still says `main`, so edit that branch's `deploy.yml` if you want
-  pushes there to auto-deploy).
+The site deploys via **GitHub Actions** (Pages Source = GitHub Actions):
+**"Deploy site (Astro) to GitHub Pages"** (`.github/workflows/deploy-site.yml`)
+runs on every push to `main` — `npm ci`, `npm run build`, publish `dist/` —
+and can also be run manually from the Actions tab (`workflow_dispatch`).
 
 ### Verify
 
@@ -139,24 +100,21 @@ workflows may be enabled at a time** — see Gotcha 1.
 curl -s https://monoidx.dev/ | grep -o "<title>[^<]*</title>"
 # → <title>MONOIDX — Sequence</title>
 
-# Classic page and Rosanero passthrough still resolve:
+# Blog, classic page and Rosanero passthrough resolve:
+curl -s -o /dev/null -w "%{http_code}\n" https://monoidx.dev/blog/
 curl -s -o /dev/null -w "%{http_code}\n" https://monoidx.dev/MONOIDX.html
 curl -s -o /dev/null -w "%{http_code}\n" https://monoidx.dev/Rosanero-app/Concepts/rosanero-community-concept.html
-
-# When the Aeon portfolio (aeon-portfolio branch) is the live site instead:
-curl -s https://monoidx.dev/ | grep -o "<title>[^<]*</title>"
-# → <title>Vincenzo Stira — Senior iOS & Mobile Platform Engineer</title>
 ```
 
 ---
 
 ## Gotchas
 
-**1. Workflow fight — only one deploy workflow may run.**
-Both branches' workflows run `actions/deploy-pages` and each publishes to the
-same Pages site. Whichever pushes last wins, so a stray push to the *other*
-branch silently overwrites the live site. Keep the inactive branch's workflow
-**disabled** (one-time setup, step 2) while the other is live.
+**1. Don't rename `deploy-site.yml` to `deploy.yml`.**
+GitHub keys a workflow's state by file path; `.github/workflows/deploy.yml`
+carries a `disabled_manually` registration from a now-deleted legacy workflow.
+Reusing that path would silently suppress the deploy (pushes trigger nothing —
+no run, no error).
 
 **2. `CNAME` must be in `public/`.**
 The build only attaches `monoidx.dev` if `public/CNAME` (containing
