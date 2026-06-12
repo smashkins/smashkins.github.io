@@ -160,3 +160,12 @@ body.scroll-edition{background:var(--black);overflow-x:hidden}
 .veil.gone{opacity:0;pointer-events:none}
 .veil .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--txt-3)}
 .veil .lbl b{color:#fff;font-weight:500}
+
+/* mobile nav: styles.css hides .nav-links under 760px (the Classic page has
+   too many anchors for a phone). The Sequence landing has only three links,
+   so show a compact version here — without this the blog is unreachable
+   from the landing on mobile. */
+@media (max-width:760px){
+  .scroll-edition .nav-links{display:flex;gap:18px}
+  .scroll-edition .nav-links a{font-size:10px;letter-spacing:.12em}
+}
