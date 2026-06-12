@@ -1,9 +1,12 @@
-name: Deploy landing (Astro) to GitHub Pages
+name: Deploy site (Astro) to GitHub Pages
 
+# Keep this file's path distinct from .github/workflows/deploy.yml — that
+# path is disabled_manually repo-wide (it's the aeon-portfolio branch's
+# workflow), and GitHub keys workflow state by path across all branches.
 on:
   push:
     branches:
-      - landing
+      - main
   workflow_dispatch:
 
 permissions:
