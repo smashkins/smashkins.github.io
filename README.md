@@ -61,6 +61,11 @@ npm run check    # astro check (type/diagnostics)
 
 ## Add a blog post
 
+**Notion is now the primary way to publish** (see "Publishing from Notion"
+below) — write in the Notion **Blog Posts** database, check **Published**, and
+an hourly Action materializes the post and deploys. Hand-written Markdown still
+works exactly as before and is never touched by the sync.
+
 Posts are Markdown under `src/content/blog/<locale>/`. **A translation pair
 shares the same `<slug>`** (`en/<slug>.md` + `it/<slug>.md`) — the language
 switcher keys on the slug to find the sibling, and falls back to the other
@@ -83,6 +88,95 @@ lang: en                                          # en | it (default en)
 
 Reading time is computed automatically; the table of contents is generated
 from the post's `h2`/`h3` headings.
+
+---
+
+## Publishing from Notion
+
+The blog can be authored in a Notion **Blog Posts** database. The flow is fully
+hands-off:
+
+```
+Notion DB row  ──(check Published)──►  hourly sync Action  ──►  commit Markdown  ──►  deploy
+```
+
+`scripts/notion-sync.mjs` (`npm run sync`) queries the database, writes
+`src/content/blog/<lang>/<slug>.md` with frontmatter that satisfies
+`src/content.config.ts`, downloads the cover + inline images into
+`public/assets/blog/<slug>/` (Notion's S3 URLs expire, so they are never
+hotlinked), and prunes posts that are no longer published.
+
+### Published checkbox semantics
+
+| Published | Effect of next sync |
+|---|---|
+| checked (`true`) | row is materialized / updated as Markdown |
+| unchecked or row deleted | the corresponding file **is deleted** (Notion is the source of truth) |
+
+Only rows with **Published = true** sync; unchecking a row removes its file and
+any orphaned images on the next run.
+
+### EN / IT pairs
+
+A translation pair is **two rows sharing the same `Slug`**, one with `Lang = en`
+and one with `Lang = it`. The slug must be kebab-case (and not numeric-only — it
+would collide with pagination routes). Each row maps to `en/<slug>.md` or
+`it/<slug>.md` respectively, matching the hand-written convention above.
+
+### Hand-written posts are protected
+
+Synced files carry a `notionId` key in their frontmatter. **Files without
+`notionId` (e.g. `building-monoidx.md`) are never modified or deleted** by the
+sync — hand-written and Notion-authored posts coexist safely.
+
+### Secrets
+
+Two repository **Actions secrets** drive the sync:
+
+| Secret | Value |
+|---|---|
+| `NOTION_TOKEN` | internal integration token (`ntn_…`) |
+| `NOTION_DATA_SOURCE_ID` | id of the Blog Posts data source |
+
+### One-time setup
+
+1. Create an **internal** integration at
+   [notion.so/my-integrations](https://www.notion.so/my-integrations) (read
+   content capability) and copy its `ntn_…` token.
+2. Connect it to the **Blog Posts** database: open the database → **•••** →
+   **Connections** → add the integration.
+3. Fetch the data source id (the API needs the data source, not the database id):
+
+   ```bash
+   curl -s https://api.notion.com/v1/databases/<DB_ID> \
+     -H "Authorization: Bearer $NOTION_TOKEN" \
+     -H "Notion-Version: 2025-09-03"
+   ```
+
+   Take `data_sources[0].id` from the response.
+4. Add both as repository secrets: **Settings → Secrets and variables →
+   Actions** → `NOTION_TOKEN` and `NOTION_DATA_SOURCE_ID`.
+
+### Publishing manually
+
+The cron runs at `:23` past every hour. To publish immediately, go to
+**Actions → "Sync blog from Notion" → Run workflow**.
+
+### Running locally
+
+```bash
+NOTION_TOKEN=… NOTION_DATA_SOURCE_ID=… npm run sync            # write changes
+NOTION_TOKEN=… NOTION_DATA_SOURCE_ID=… npm run sync -- --dry-run  # preview only
+```
+
+### Webhook upgrade path
+
+The sync is a scheduled Action by design — Notion webhooks POST without a custom
+auth header and GitHub `repository_dispatch` requires one, so a webhook needs a
+relay. To get instant (sub-hour) publishing later: stand up a **Cloudflare
+Worker** that validates Notion's webhook signature and calls
+`POST /repos/…/dispatches`, then add a `repository_dispatch` trigger to
+`.github/workflows/notion-sync.yml`.
 
 ---
 
