@@ -45,7 +45,7 @@ const NOTION_ID_RE = /^notionId:\s*(.+?)\s*$/m;
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
-/** @param {string} msg */
+/** @param {string} msg @returns {never} */
 function fail(msg) {
   throw new Error(msg);
 }
@@ -177,7 +177,7 @@ function extractProps(page) {
   const update = updateRaw ? toDateOnly(updateRaw, url, 'UpdateDate') : undefined;
 
   const tags = Array.isArray(props.Tags?.multi_select)
-    ? props.Tags.multi_select.map((t) => t.name).filter(Boolean)
+    ? props.Tags.multi_select.map((/** @type {{ name: string }} */ t) => t.name).filter(Boolean)
     : [];
 
   return {
@@ -294,7 +294,7 @@ function makeConverter(notion, slug) {
     // Caption is flattened to plain text; rich formatting/links in a caption
     // are not preserved.
     const caption = Array.isArray(image.caption)
-      ? image.caption.map((c) => c.plain_text ?? '').join('').trim()
+      ? image.caption.map((/** @type {{ plain_text?: string }} */ c) => c.plain_text ?? '').join('').trim()
       : '';
     const localRef = await downloadImage(url, slug);
     // With a caption, emit a single-line raw-HTML figure so the caption renders
