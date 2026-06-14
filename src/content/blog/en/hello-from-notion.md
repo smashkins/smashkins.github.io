@@ -39,4 +39,4 @@ const posts = await notion.dataSources.query({
 More details in the [first post](https://monoidx.dev/blog/building-monoidx/) about how this blog was built.
 
 
-![The MONOIDX unit](/assets/blog/hello-from-notion/8f44f1ac1181.jpg)
+<figure><img src="/assets/blog/hello-from-notion/8f44f1ac1181.jpg" alt="The MONOIDX unit" /><figcaption>The MONOIDX unit</figcaption></figure>

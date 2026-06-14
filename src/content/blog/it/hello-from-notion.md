@@ -39,4 +39,4 @@ const posts = await notion.dataSources.query({
 Altri dettagli nel [primo articolo](https://monoidx.dev/it/blog/building-monoidx/) su come è stato costruito questo blog.
 
 
-![L'unità MONOIDX](/assets/blog/hello-from-notion/8f44f1ac1181.jpg)
+<figure><img src="/assets/blog/hello-from-notion/8f44f1ac1181.jpg" alt="L'unità MONOIDX" /><figcaption>L'unità MONOIDX</figcaption></figure>

@@ -50,6 +50,16 @@ function fail(msg) {
   throw new Error(msg);
 }
 
+/** Escape text for use inside an HTML element. @param {string} s */
+function escapeText(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Escape text for use inside a double-quoted HTML attribute. @param {string} s */
+function escapeAttr(s) {
+  return escapeText(s).replace(/"/g, '&quot;');
+}
+
 /** Read required env, failing loudly. @returns {{ token: string, dataSourceId: string }} */
 function readConfig() {
   const token = process.env.NOTION_TOKEN;
@@ -281,12 +291,18 @@ function makeConverter(notion, slug) {
     if (!image) return false; // fall back to default handling
     const url = image.type === 'external' ? image.external?.url : image.file?.url;
     if (!url) return false;
+    // Caption is flattened to plain text; rich formatting/links in a caption
+    // are not preserved.
     const caption = Array.isArray(image.caption)
       ? image.caption.map((c) => c.plain_text ?? '').join('').trim()
       : '';
     const localRef = await downloadImage(url, slug);
-    const alt = caption || 'image';
-    return `![${alt}](${localRef})`;
+    // With a caption, emit a single-line raw-HTML figure so the caption renders
+    // visibly beneath the image (Astro renders raw HTML in .md; a single line
+    // surrounded by the \n\n block join is treated as an HTML block, not wrapped
+    // in <p>). Without one, a plain image with empty alt (no descriptive source).
+    if (!caption) return `![](${localRef})`;
+    return `<figure><img src="${localRef}" alt="${escapeAttr(caption)}" /><figcaption>${escapeText(caption)}</figcaption></figure>`;
   });
   return n2m;
 }

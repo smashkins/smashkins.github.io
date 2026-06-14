@@ -468,6 +468,18 @@
   height: auto;
   border: 1px solid var(--line);
 }
+.post-body figure {
+  margin: 0; /* reset default; .post-body > * + * keeps the vertical rhythm */
+}
+.post-body figcaption {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--txt-3);
+}
 
 /* ---------- table of contents ---------- */
 .post-toc__list {
