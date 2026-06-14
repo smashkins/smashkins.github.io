@@ -11,9 +11,14 @@ const { label } = Astro.props;
 </button>
 
 <script>
-  const btn = document.querySelector<HTMLButtonElement>('[data-to-top]');
-  if (btn) {
-    const onScroll = () => {
+  // View-transition-safe: re-init on every page load and tear down the window
+  // scroll listener before a swap so it never leaks across navigations.
+  let onScroll: (() => void) | null = null;
+
+  function initToTop() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-to-top]');
+    if (!btn) return;
+    onScroll = () => {
       btn.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.8);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -24,4 +29,16 @@ const { label } = Astro.props;
       window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
     });
   }
+
+  function teardownToTop() {
+    if (onScroll) {
+      window.removeEventListener('scroll', onScroll);
+      onScroll = null;
+    }
+  }
+
+  // ToTop only renders on blog pages, which have ClientRouter, so
+  // `astro:page-load` fires on the initial load and after every swap.
+  document.addEventListener('astro:page-load', initToTop);
+  document.addEventListener('astro:before-swap', teardownToTop);
 </script>

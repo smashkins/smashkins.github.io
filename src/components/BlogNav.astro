@@ -1,5 +1,7 @@
 ---
 import { type Locale, t, switchLocalePath } from '~/i18n';
+import MusicPlayer from '~/components/MusicPlayer.astro';
+import NavMenu from '~/components/NavMenu.astro';
 
 export interface Props {
   locale: Locale;
@@ -21,13 +23,17 @@ const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
 
 <nav class="blog-nav">
   <a class="blog-nav__brand" href={homeHref}>MONOIDX</a>
-  <div class="blog-nav__links">
-    <a href={blogHref}>{strings.nav.blog}</a>
-    <a href="/MONOIDX.html">{strings.nav.classic}</a>
-    <span class="blog-nav__switch">
-      <a href={enPath} class={locale === 'en' ? 'is-active' : undefined} hreflang="en">EN</a>
-      <span class="blog-nav__sep">/</span>
-      <a href={itPath} class={locale === 'it' ? 'is-active' : undefined} hreflang="it">IT</a>
-    </span>
+  <div class="blog-nav__cluster">
+    <div class="blog-nav__links" id="blog-nav-menu" data-nav-menu>
+      <a href={blogHref}>{strings.nav.blog}</a>
+      <a href="/MONOIDX.html">{strings.nav.classic}</a>
+      <span class="blog-nav__switch">
+        <a href={enPath} class={locale === 'en' ? 'is-active' : undefined} hreflang="en">EN</a>
+        <span class="blog-nav__sep">/</span>
+        <a href={itPath} class={locale === 'it' ? 'is-active' : undefined} hreflang="it">IT</a>
+      </span>
+    </div>
+    <MusicPlayer />
+    <NavMenu controls="blog-nav-menu" />
   </div>
 </nav>

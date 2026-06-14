@@ -1,0 +1,125 @@
+---
+// Mobile-only hamburger toggle for the topbar nav links. The icon is in the
+// MONOIDX style (hairline square + three rules → X when open). The links it
+// controls live in the element whose id === `controls`.
+interface Props {
+  controls: string;
+}
+const { controls } = Astro.props;
+---
+
+<button
+  class="nav-burger"
+  type="button"
+  data-nav-toggle
+  aria-controls={controls}
+  aria-expanded="false"
+  aria-label="Menu"
+>
+  <span class="nav-burger__box" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </span>
+</button>
+
+<style>
+  .nav-burger {
+    display: none; /* desktop: links are inline, no hamburger */
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    appearance: none;
+    border-radius: 0;
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--txt-3);
+    cursor: pointer;
+    transition: border-color 0.35s var(--ease);
+  }
+  .nav-burger:hover { border-color: var(--silver); }
+  .nav-burger__box {
+    position: relative;
+    width: 14px;
+    height: 10px;
+  }
+  .nav-burger__box span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--txt-2);
+    transition:
+      transform 0.3s var(--ease),
+      opacity 0.2s var(--ease),
+      background 0.3s var(--ease);
+  }
+  .nav-burger__box span:nth-child(1) { top: 0; }
+  .nav-burger__box span:nth-child(2) { top: 50%; transform: translateY(-50%); }
+  .nav-burger__box span:nth-child(3) { bottom: 0; }
+  .nav-burger:hover .nav-burger__box span { background: var(--txt-1); }
+  /* open → X */
+  .nav-burger.is-active .nav-burger__box span:nth-child(1) {
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .nav-burger.is-active .nav-burger__box span:nth-child(2) { opacity: 0; }
+  .nav-burger.is-active .nav-burger__box span:nth-child(3) {
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%) rotate(-45deg);
+  }
+
+  @media (max-width: 760px) {
+    .nav-burger { display: inline-flex; }
+  }
+</style>
+
+<script>
+  // One document-level delegated handler, bound once for the whole site. Because
+  // it never references specific nav nodes, it survives view-transition swaps
+  // (the nav re-renders, but `document` and this listener persist).
+  (function () {
+    const w = window as unknown as { __navMenuBound?: boolean };
+    if (w.__navMenuBound) return;
+    w.__navMenuBound = true;
+
+    function closeAll() {
+      document
+        .querySelectorAll<HTMLButtonElement>('[data-nav-toggle][aria-expanded="true"]')
+        .forEach((btn) => {
+          btn.setAttribute('aria-expanded', 'false');
+          btn.classList.remove('is-active');
+          const menu = document.getElementById(btn.getAttribute('aria-controls') || '');
+          menu?.classList.remove('is-open');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const toggle = target.closest<HTMLButtonElement>('[data-nav-toggle]');
+      if (toggle) {
+        const menu = document.getElementById(toggle.getAttribute('aria-controls') || '');
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        closeAll();
+        if (!isOpen && menu) {
+          toggle.setAttribute('aria-expanded', 'true');
+          toggle.classList.add('is-active');
+          menu.classList.add('is-open');
+        }
+        return;
+      }
+      // A link inside the menu, or a click outside the menu, closes it.
+      if (target.closest('[data-nav-menu] a') || !target.closest('[data-nav-menu]')) {
+        closeAll();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAll();
+    });
+
+    // Close any open menu when a client navigation begins.
+    document.addEventListener('astro:before-swap', closeAll);
+  })();
+</script>

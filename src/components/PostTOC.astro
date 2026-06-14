@@ -48,8 +48,14 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 }
 
 <script>
-  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
-  if (links.length > 0) {
+  // View-transition-safe scroll-spy: rebuild on every page load, disconnect the
+  // observer before a swap so it doesn't observe detached nodes after navigation.
+  let observer: IntersectionObserver | null = null;
+
+  function initToc() {
+    const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
+    if (links.length === 0) return;
+
     const slugs: string[] = [];
     const seen = new Set<string>();
     links.forEach((link) => {
@@ -71,7 +77,7 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     };
 
     const visible = new Set<string>();
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const id = entry.target.id;
@@ -86,9 +92,19 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
     slugs.forEach((slug) => {
       const el = document.getElementById(slug);
-      if (el) observer.observe(el);
+      if (el) observer!.observe(el);
     });
 
     if (slugs[0]) setActive(slugs[0]);
   }
+
+  function teardownToc() {
+    observer?.disconnect();
+    observer = null;
+  }
+
+  // PostTOC only renders on blog post pages, which have ClientRouter, so
+  // `astro:page-load` fires on the initial load and after every swap.
+  document.addEventListener('astro:page-load', initToc);
+  document.addEventListener('astro:before-swap', teardownToc);
 </script>

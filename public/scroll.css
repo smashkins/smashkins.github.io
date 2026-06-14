@@ -161,11 +161,29 @@ body.scroll-edition{background:var(--black);overflow-x:hidden}
 .veil .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--txt-3)}
 .veil .lbl b{color:#fff;font-weight:500}
 
-/* mobile nav: styles.css hides .nav-links under 760px (the Classic page has
-   too many anchors for a phone). The Sequence landing has only three links,
-   so show a compact version here — without this the blog is unreachable
-   from the landing on mobile. */
+/* right-side cluster: collapsible links + player + (mobile) hamburger */
+.scroll-edition .nav-cluster{display:flex;align-items:center;gap:34px}
+
+/* mobile nav: the links collapse into a dropdown panel toggled by the
+   hamburger; the music player + hamburger stay in the bar. */
 @media (max-width:760px){
-  .scroll-edition .nav-links{display:flex;gap:18px}
-  .scroll-edition .nav-links a{font-size:10px;letter-spacing:.12em}
+  .scroll-edition .nav{padding-inline:16px}
+  .scroll-edition .brand{letter-spacing:.14em}
+  .scroll-edition .nav-cluster{gap:10px}
+  .scroll-edition .nav-links{
+    display:flex;flex-direction:column;align-items:stretch;gap:0;
+    position:absolute;top:100%;left:0;right:0;
+    padding:6px 16px 16px;
+    background:rgba(5,5,5,.985);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+    transform:translateY(-8px);opacity:0;pointer-events:none;
+    transition:opacity .35s var(--ease),transform .35s var(--ease);
+  }
+  .scroll-edition .nav-links.is-open{opacity:1;transform:none;pointer-events:auto}
+  .scroll-edition .nav-links a{
+    font-size:12px;letter-spacing:.18em;padding:15px 2px;
+    border-top:1px solid var(--line);
+  }
+  .scroll-edition .nav-links a:first-child{border-top:0}
 }

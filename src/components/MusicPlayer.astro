@@ -1,0 +1,250 @@
+---
+// Minimal background-music player: streams the audio of a YouTube playlist on
+// loop via the IFrame Player API (hidden video). Play / Stop + a volume slider,
+// in the MONOIDX style. The wrapper is `transition:persist`ed so the iframe —
+// and thus the audio and the chosen volume — survive blog view-transition navs.
+const PLAYLIST = 'PLDQmiNJl6F54';
+---
+
+<div class="bg-player" id="bg-player" transition:persist="bg-player" data-playlist={PLAYLIST}>
+  <button class="bg-player__btn" data-bg-play type="button" aria-label="Play background music" title="Play">
+    <span aria-hidden="true">&#9654;</span>
+  </button>
+  <button class="bg-player__btn" data-bg-stop type="button" aria-label="Stop background music" title="Stop" disabled>
+    <span aria-hidden="true">&#9632;</span>
+  </button>
+  <input
+    class="bg-player__vol"
+    data-bg-vol
+    type="range"
+    min="0"
+    max="100"
+    step="1"
+    value="55"
+    aria-label="Volume"
+    title="Volume"
+  />
+  <div class="bg-player__frame" aria-hidden="true"><div id="bg-player-yt"></div></div>
+</div>
+
+<style>
+  .bg-player {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bg-player__btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    appearance: none;
+    border-radius: 0;
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--txt-3);
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      border-color 0.35s var(--ease),
+      color 0.35s var(--ease),
+      opacity 0.35s var(--ease);
+  }
+  .bg-player__btn:hover:not(:disabled) {
+    border-color: var(--silver);
+    color: var(--txt-1);
+  }
+  .bg-player__btn[data-bg-play] { font-size: 9px; }
+  .bg-player__btn:disabled {
+    color: var(--txt-4);
+    cursor: default;
+  }
+  /* the active (currently-available) control reads brighter */
+  .bg-player.is-playing [data-bg-stop],
+  .bg-player:not(.is-playing) [data-bg-play] {
+    color: var(--silver);
+    border-color: var(--line-2);
+  }
+
+  /* volume slider — hairline track, small square thumb */
+  .bg-player__vol {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 56px;
+    height: 14px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .bg-player__vol::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--line-2);
+  }
+  .bg-player__vol::-moz-range-track {
+    height: 1px;
+    background: var(--line-2);
+  }
+  .bg-player__vol::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 7px;
+    margin-top: -3px;
+    border-radius: 0;
+    background: var(--txt-3);
+    transition: background 0.3s var(--ease);
+  }
+  .bg-player__vol::-moz-range-thumb {
+    width: 7px;
+    height: 7px;
+    border: 0;
+    border-radius: 0;
+    background: var(--txt-3);
+  }
+  .bg-player__vol:hover::-webkit-slider-thumb,
+  .bg-player__vol:focus-visible::-webkit-slider-thumb { background: var(--silver); }
+  .bg-player__vol:hover::-moz-range-thumb,
+  .bg-player__vol:focus-visible::-moz-range-thumb { background: var(--silver); }
+
+  /* tighter on phones */
+  @media (max-width: 760px) {
+    .bg-player { gap: 6px; }
+    .bg-player__btn { width: 25px; height: 25px; }
+    .bg-player__vol { width: 46px; }
+  }
+
+  /* visually-hidden iframe mount — NOT display:none, so audio keeps playing */
+  .bg-player__frame {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    left: -9999px;
+    top: 0;
+  }
+</style>
+
+<script>
+  // Guard: with `transition:persist`, this bundled module may be re-evaluated on
+  // a client navigation, but the player + listeners must be created only once.
+  function setupBgPlayer() {
+    const w = window as unknown as {
+      __bgPlayer?: boolean;
+      YT?: any;
+      onYouTubeIframeAPIReady?: () => void;
+    };
+    if (w.__bgPlayer) return;
+    const root = document.getElementById('bg-player');
+    const mount = document.getElementById('bg-player-yt');
+    if (!root || !mount) return;
+    w.__bgPlayer = true;
+
+    const playBtn = root.querySelector<HTMLButtonElement>('[data-bg-play]');
+    const stopBtn = root.querySelector<HTMLButtonElement>('[data-bg-stop]');
+    const volEl = root.querySelector<HTMLInputElement>('[data-bg-vol]');
+    const playlist = root.dataset.playlist || '';
+    const VOL_KEY = 'bg-player-volume';
+    let player: any = null;
+    let armed = true; // auto-start on the first user gesture
+
+    // Restore saved volume (default 55) into the slider before the API is ready.
+    const savedVol = (() => {
+      const raw = Number(localStorage.getItem(VOL_KEY));
+      return Number.isFinite(raw) && raw >= 0 && raw <= 100 ? raw : 55;
+    })();
+    if (volEl) volEl.value = String(savedVol);
+
+    function reflect(playing: boolean) {
+      root!.classList.toggle('is-playing', playing);
+      if (playBtn) playBtn.disabled = playing;
+      if (stopBtn) stopBtn.disabled = !playing;
+    }
+
+    function disarm() {
+      if (!armed) return;
+      armed = false;
+      ['click', 'scroll', 'keydown', 'touchstart'].forEach((ev) =>
+        window.removeEventListener(ev, onFirstGesture, { capture: true } as any),
+      );
+    }
+    function onFirstGesture() {
+      disarm();
+      if (player && typeof player.playVideo === 'function') player.playVideo();
+    }
+
+    playBtn?.addEventListener('click', () => {
+      disarm();
+      player?.playVideo?.();
+    });
+    stopBtn?.addEventListener('click', () => {
+      disarm();
+      player?.pauseVideo?.(); // "stop" = pause so Play resumes cleanly
+    });
+    volEl?.addEventListener('input', () => {
+      const v = Number(volEl.value);
+      localStorage.setItem(VOL_KEY, String(v));
+      player?.setVolume?.(v);
+    });
+    ['click', 'scroll', 'keydown', 'touchstart'].forEach((ev) =>
+      window.addEventListener(ev, onFirstGesture, { capture: true, passive: true } as any),
+    );
+
+    function createPlayer() {
+      const YT = w.YT;
+      if (!YT || !YT.Player) return;
+      player = new YT.Player('bg-player-yt', {
+        width: '1',
+        height: '1',
+        playerVars: {
+          listType: 'playlist',
+          list: playlist,
+          loop: 1,
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
+          origin: location.origin,
+        },
+        events: {
+          onReady: (e: any) => {
+            e.target.setVolume(savedVol);
+            if (!armed) e.target.playVideo(); // visitor already interacted
+          },
+          onStateChange: (e: any) => {
+            const S = w.YT.PlayerState;
+            reflect(e.data === S.PLAYING || e.data === S.BUFFERING);
+            if (e.data === S.ENDED) e.target.playVideo(); // loop fallback
+          },
+        },
+      });
+    }
+
+    // Load the IFrame API once, then create the player.
+    if (w.YT && w.YT.Player) {
+      createPlayer();
+    } else {
+      const prev = w.onYouTubeIframeAPIReady;
+      w.onYouTubeIframeAPIReady = () => {
+        prev?.();
+        createPlayer();
+      };
+      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    }
+  }
+
+  setupBgPlayer();
+  document.addEventListener('astro:page-load', setupBgPlayer);
+</script>

@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import MusicPlayer from '~/components/MusicPlayer.astro';
+import NavMenu from '~/components/NavMenu.astro';
 ---
 
 <BaseLayout title="MONOIDX — Sequence" bodyClass="scroll-edition">
@@ -22,10 +24,14 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
   <!-- nav -->
   <nav class="nav" id="nav">
     <div class="brand">MONOIDX</div>
-    <div class="nav-links">
-      <a href="/blog/">Blog</a>
-      <a href="/MONOIDX.html">Classic</a>
-      <a href="#contact" class="nav-cta">Contact</a>
+    <div class="nav-cluster">
+      <div class="nav-links" id="landing-nav-menu" data-nav-menu>
+        <a href="/blog/">Blog</a>
+        <a href="/MONOIDX.html">Classic</a>
+        <a href="#contact" class="nav-cta">Contact</a>
+      </div>
+      <MusicPlayer />
+      <NavMenu controls="landing-nav-menu" />
     </div>
   </nav>
 
