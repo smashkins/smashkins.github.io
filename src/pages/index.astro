@@ -161,6 +161,17 @@ import NowPlaying from '~/components/NowPlaying.astro';
     </div>
   </footer>
 
+  <script is:inline>
+    // If the visitor was last reading the Italian blog, point the landing's
+    // Blog link back to /it/blog/ so their language choice persists.
+    try {
+      if (localStorage.getItem('monoidx-lang') === 'it') {
+        var blogLink = document.querySelector('.nav-links a[href="/blog/"]');
+        if (blogLink) blogLink.setAttribute('href', '/it/blog/');
+      }
+    } catch (e) {}
+  </script>
+
   <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script is:inline src="/scroll.js"></script>

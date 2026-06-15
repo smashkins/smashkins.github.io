@@ -16,13 +16,16 @@ const { locale, switchEn, switchIt } = Astro.props;
 const strings = t(locale);
 
 const blogHref = locale === 'it' ? '/it/blog/' : '/blog/';
-const homeHref = locale === 'it' ? '/it/' : '/';
+// The landing is a single shared (English) page at "/", so the brand always
+// returns there — there is no "/it/" landing. Language is remembered separately
+// (see the script below) so the landing's Blog link points back to /it/blog/.
+const homeHref = '/';
 
 const enPath = switchEn ?? switchLocalePath(Astro.url.pathname, 'en');
 const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
 ---
 
-<nav class="blog-nav">
+<nav class="blog-nav" data-locale={locale}>
   <a class="blog-nav__brand" href={homeHref}>MONOIDX</a>
   <div class="blog-nav__cluster">
     <div class="blog-nav__cluster-row">
@@ -41,3 +44,19 @@ const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
     <NowPlaying />
   </div>
 </nav>
+
+<script>
+  // Remember the language the visitor is reading the blog in, so the (shared,
+  // English) landing can send them back to the right locale via its Blog link.
+  function recordLang() {
+    const nav = document.querySelector('.blog-nav[data-locale]');
+    if (!nav) return;
+    try {
+      localStorage.setItem('monoidx-lang', nav.getAttribute('data-locale') || 'en');
+    } catch {
+      /* storage unavailable */
+    }
+  }
+  recordLang();
+  document.addEventListener('astro:page-load', recordLang);
+</script>
