@@ -176,7 +176,8 @@ const PLAYLIST = 'PLDQmiNJl6F54';
     const playlist = root.dataset.playlist || '';
     const VOL_KEY = 'bg-player-volume';
     let player: any = null;
-    let armed = true; // auto-start on the first user gesture
+    let autoStart = true; // keep trying to start on gestures until playback begins
+    let gestured = false; // the visitor has interacted at least once
 
     // Restore saved volume (default 55) into the slider before the API is ready.
     const savedVol = (() => {
@@ -219,24 +220,30 @@ const PLAYLIST = 'PLDQmiNJl6F54';
       paintTicker();
     }
 
-    function disarm() {
-      if (!armed) return;
-      armed = false;
-      ['click', 'scroll', 'keydown', 'touchstart'].forEach((ev) =>
-        window.removeEventListener(ev, onFirstGesture, { capture: true } as any),
-      );
+    const GESTURES = ['click', 'scroll', 'keydown', 'touchstart'];
+    // Try to start on EVERY gesture (not just the first). On a cold direct
+    // arrival the YouTube player can take a second or two to load, so the first
+    // gesture may land before it exists; retrying within real gesture windows
+    // (required by autoplay policy) means a later scroll/click still starts it.
+    function tryAutoStart() {
+      if (!autoStart) return;
+      gestured = true;
+      player?.playVideo?.();
     }
-    function onFirstGesture() {
-      disarm();
-      if (player && typeof player.playVideo === 'function') player.playVideo();
+    function endAutoStart() {
+      if (!autoStart) return;
+      autoStart = false;
+      GESTURES.forEach((ev) =>
+        window.removeEventListener(ev, tryAutoStart, { capture: true } as any),
+      );
     }
 
     playBtn?.addEventListener('click', () => {
-      disarm();
-      player?.playVideo?.();
+      gestured = true;
+      player?.playVideo?.(); // onStateChange(PLAYING) ends auto-start arming
     });
     stopBtn?.addEventListener('click', () => {
-      disarm();
+      endAutoStart(); // user opted out — don't let a later gesture restart it
       player?.pauseVideo?.(); // "stop" = pause so Play resumes cleanly
     });
     volEl?.addEventListener('input', () => {
@@ -244,8 +251,8 @@ const PLAYLIST = 'PLDQmiNJl6F54';
       localStorage.setItem(VOL_KEY, String(v));
       player?.setVolume?.(v);
     });
-    ['click', 'scroll', 'keydown', 'touchstart'].forEach((ev) =>
-      window.addEventListener(ev, onFirstGesture, { capture: true, passive: true } as any),
+    GESTURES.forEach((ev) =>
+      window.addEventListener(ev, tryAutoStart, { capture: true, passive: true } as any),
     );
 
     function createPlayer() {
@@ -270,11 +277,16 @@ const PLAYLIST = 'PLDQmiNJl6F54';
         events: {
           onReady: (e: any) => {
             e.target.setVolume(savedVol);
-            if (!armed) e.target.playVideo(); // visitor already interacted
+            // If the visitor already interacted before the player finished
+            // loading, start now (Chrome keeps sticky activation; otherwise the
+            // next gesture's tryAutoStart starts it).
+            if (gestured && autoStart) e.target.playVideo();
           },
           onStateChange: (e: any) => {
             const S = w.YT.PlayerState;
-            reflect(e.data === S.PLAYING || e.data === S.BUFFERING);
+            const playing = e.data === S.PLAYING || e.data === S.BUFFERING;
+            reflect(playing);
+            if (playing) endAutoStart(); // playback began — stop retrying
             if (e.data === S.ENDED) e.target.playVideo(); // loop fallback
           },
         },
