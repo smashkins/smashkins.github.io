@@ -1,0 +1,65 @@
+---
+// Now-playing ticker. Sits on a second line beneath the topbar menu, its frame
+// spanning the menu's width. Driven by the MusicPlayer script (which holds the
+// YouTube player) via the [data-bg-ticker*] hooks. Two identical title copies
+// give a seamless, infinite horizontal scroll.
+---
+
+<div class="now-playing" data-bg-ticker aria-hidden="true">
+  <div class="now-playing__track" data-bg-ticker-track>
+    <span class="now-playing__text" data-bg-ticker-text></span>
+    <span class="now-playing__text" data-bg-ticker-text></span>
+  </div>
+</div>
+
+<style>
+  .now-playing {
+    display: none;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 16px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .now-playing.is-on {
+    display: block;
+  }
+  /* the track is absolutely positioned so its nowrap width never widens the
+     cluster — the cluster (and so this ticker's frame) sizes to the menu row. */
+  .now-playing__track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    animation: now-playing-scroll var(--np-dur, 12s) linear infinite;
+  }
+  .now-playing__text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--txt-3);
+  }
+  .now-playing__text::after {
+    content: "·";
+    color: var(--txt-4);
+    padding: 0 1.25em;
+  }
+  @keyframes now-playing-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .now-playing__track { animation: none; }
+  }
+  /* never shown on mobile (the player is disabled there anyway) */
+  @media (max-width: 760px) {
+    .now-playing { display: none !important; }
+  }
+</style>

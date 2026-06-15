@@ -161,8 +161,10 @@ body.scroll-edition{background:var(--black);overflow-x:hidden}
 .veil .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--txt-3)}
 .veil .lbl b{color:#fff;font-weight:500}
 
-/* right-side cluster: collapsible links + player + (mobile) hamburger */
-.scroll-edition .nav-cluster{display:flex;align-items:center;gap:34px}
+/* right-side cluster: row of [links + player + (mobile) hamburger] with the
+   now-playing ticker on a second line beneath it */
+.scroll-edition .nav-cluster{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.scroll-edition .nav-cluster-row{display:flex;align-items:center;gap:34px}
 
 /* mobile nav: the links collapse into a dropdown panel toggled by the
    hamburger; the music player + hamburger stay in the bar. */

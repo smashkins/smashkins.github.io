@@ -129,6 +129,31 @@ const PLAYLIST = 'PLDQmiNJl6F54';
 </style>
 
 <script>
+  // Now-playing ticker state (module scope so it can be repainted after a
+  // view-transition navigation, when the nav — and its ticker — re-render).
+  let currentTitle = '';
+  let isPlaying = false;
+
+  function paintTicker() {
+    const ticker = document.querySelector('[data-bg-ticker]');
+    if (!ticker) return;
+    ticker.querySelectorAll('[data-bg-ticker-text]').forEach((el) => {
+      el.textContent = currentTitle;
+    });
+    const on = isPlaying && !!currentTitle;
+    ticker.classList.toggle('is-on', on);
+    if (on) {
+      const track = ticker.querySelector<HTMLElement>('[data-bg-ticker-track]');
+      const copy = ticker.querySelector<HTMLElement>('[data-bg-ticker-text]');
+      if (track && copy) {
+        // one copy (incl. its separator) is half the track; -50% scrolls exactly
+        // that far, so duration = copyWidth / speed keeps a constant ~30px/s.
+        const copyW = copy.getBoundingClientRect().width;
+        if (copyW > 0) track.style.setProperty('--np-dur', Math.max(8, copyW / 30) + 's');
+      }
+    }
+  }
+
   // Guard: with `transition:persist`, this bundled module may be re-evaluated on
   // a client navigation, but the player + listeners must be created only once.
   function setupBgPlayer() {
@@ -160,10 +185,38 @@ const PLAYLIST = 'PLDQmiNJl6F54';
     })();
     if (volEl) volEl.value = String(savedVol);
 
+    let pollId = 0;
+    function checkTitle() {
+      try {
+        const data = player && player.getVideoData ? player.getVideoData() : null;
+        const title = data && data.title ? String(data.title) : '';
+        if (title && title !== currentTitle) {
+          currentTitle = title;
+          paintTicker();
+        }
+      } catch {
+        /* getVideoData not ready yet */
+      }
+    }
+    function startPoll() {
+      checkTitle();
+      if (!pollId) pollId = window.setInterval(checkTitle, 2000);
+    }
+    function stopPoll() {
+      if (pollId) {
+        clearInterval(pollId);
+        pollId = 0;
+      }
+    }
+
     function reflect(playing: boolean) {
       root!.classList.toggle('is-playing', playing);
       if (playBtn) playBtn.disabled = playing;
       if (stopBtn) stopBtn.disabled = !playing;
+      isPlaying = playing;
+      if (playing) startPoll();
+      else stopPoll();
+      paintTicker();
     }
 
     function disarm() {
@@ -247,4 +300,6 @@ const PLAYLIST = 'PLDQmiNJl6F54';
 
   setupBgPlayer();
   document.addEventListener('astro:page-load', setupBgPlayer);
+  // Re-sync the (re-rendered) ticker after a view-transition navigation.
+  document.addEventListener('astro:page-load', paintTicker);
 </script>
