@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '~/i18n';
+import { localizedHref, type Locale } from '~/i18n';
 
 export type BlogEntry = CollectionEntry<'blog'>;
 
@@ -57,4 +57,38 @@ export function getRelatedPosts(
     .sort((a, b) => b.score - a.score);
 
   return scored.slice(0, max).map((s) => s.post);
+}
+
+/** One post as it appears in the client-side search index. */
+export interface SearchRecord {
+  title: string;
+  excerpt: string;
+  tags: { label: string; href: string }[];
+  href: string;
+  dateISO: string;
+  dateLabel: string;
+}
+
+/**
+ * Build the flat, JSON-serialisable search index for a locale. Mirrors what
+ * `PostCard` / `PostMeta` render so the client can rebuild cards from JSON
+ * without re-deriving hrefs or date formats.
+ */
+export async function buildSearchIndex(locale: Locale): Promise<SearchRecord[]> {
+  const posts = await getPosts(locale);
+  const dateLocale = locale === 'it' ? 'it-IT' : 'en-GB';
+
+  return posts.map((entry) => ({
+    title: entry.data.title,
+    excerpt: entry.data.excerpt,
+    tags: entry.data.tags.slice(0, 3).map((tag) => ({
+      label: tag,
+      href: localizedHref(`/blog/tags/${tagSlug(tag)}/`, locale),
+    })),
+    href: localizedHref(`/blog/${slugOf(entry)}/`, locale),
+    dateISO: entry.data.publishDate.toISOString(),
+    dateLabel: entry.data.publishDate
+      .toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })
+      .toUpperCase(),
+  }));
 }

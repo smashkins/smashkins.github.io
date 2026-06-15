@@ -1,0 +1,180 @@
+---
+import { type Locale, t } from '~/i18n';
+
+export interface Props {
+  locale: Locale;
+  /** URL of the prerendered search index JSON for this locale. */
+  indexUrl: string;
+}
+
+const { locale, indexUrl } = Astro.props;
+const strings = t(locale);
+---
+
+<div
+  class="blog-search"
+  data-blog-search
+  data-index-url={indexUrl}
+  data-no-results={strings.search.noResults}
+>
+  <label class="blog-search__label" for="blog-search-input">{strings.search.label}</label>
+  <div class="blog-search__field">
+    <svg
+      class="blog-search__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+    </svg>
+    <input
+      id="blog-search-input"
+      type="search"
+      class="blog-search__input"
+      placeholder={strings.search.placeholder}
+      autocomplete="off"
+      aria-label={strings.search.label}
+      data-search-input
+    />
+  </div>
+  <p class="blog-search__status" role="status" aria-live="polite" data-search-status hidden></p>
+  <div class="post-list blog-search__results" data-search-results hidden></div>
+</div>
+
+<script>
+  import Fuse from 'fuse.js';
+
+  interface TagRef {
+    label: string;
+    href: string;
+  }
+  interface SearchRecord {
+    title: string;
+    excerpt: string;
+    tags: TagRef[];
+    href: string;
+    dateISO: string;
+    dateLabel: string;
+  }
+
+  // Cache fetched indices across view-transition navigations (the module is
+  // evaluated once; only `setup` re-runs on astro:page-load).
+  const indexCache = new Map<string, Promise<SearchRecord[]>>();
+
+  function loadIndex(url: string): Promise<SearchRecord[]> {
+    let pending = indexCache.get(url);
+    if (!pending) {
+      pending = fetch(url).then((res) => res.json() as Promise<SearchRecord[]>);
+      indexCache.set(url, pending);
+    }
+    return pending;
+  }
+
+  function escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Mirrors PostCard.astro so search results inherit the same styling.
+  function renderCard(rec: SearchRecord): string {
+    const tags = rec.tags
+      .map(
+        (tag) =>
+          `<li><a href="${escapeHtml(tag.href)}" class="tag-chip">${escapeHtml(tag.label)}</a></li>`
+      )
+      .join('');
+    const tagList = tags ? `<ul class="post-card__tags">${tags}</ul>` : '';
+    const title = escapeHtml(rec.title);
+
+    return `<article class="post-card">
+        <a class="post-card__link" href="${escapeHtml(rec.href)}" aria-label="${title}"></a>
+        <div class="post-card__date">
+          <span class="post-meta"><time datetime="${escapeHtml(rec.dateISO)}">${escapeHtml(rec.dateLabel)}</time></span>
+        </div>
+        <div class="post-card__body">
+          <h2 class="post-card__title">${title}</h2>
+          <p class="post-card__excerpt">${escapeHtml(rec.excerpt)}</p>
+        </div>
+        <div class="post-card__aside">
+          ${tagList}
+          <span class="post-card__arrow" aria-hidden="true">→</span>
+        </div>
+      </article>`;
+  }
+
+  function setup() {
+    const root = document.querySelector<HTMLElement>('[data-blog-search]');
+    if (!root || root.dataset.bound === 'true') return;
+
+    const input = root.querySelector<HTMLInputElement>('[data-search-input]');
+    const results = root.querySelector<HTMLElement>('[data-search-results]');
+    const status = root.querySelector<HTMLElement>('[data-search-status]');
+    const indexUrl = root.dataset.indexUrl;
+    const noResultsText = root.dataset.noResults ?? 'No posts match';
+    if (!input || !results || !status || !indexUrl) return;
+
+    // The paginated list + pagination that search temporarily replaces.
+    const defaultList = document.querySelector<HTMLElement>(
+      '.post-list:not(.blog-search__results)'
+    );
+    const pagination = document.querySelector<HTMLElement>('.blog-pagination');
+
+    let fuse: Fuse<SearchRecord> | null = null;
+    async function ensureFuse(): Promise<Fuse<SearchRecord>> {
+      if (!fuse) {
+        const records = await loadIndex(indexUrl!);
+        fuse = new Fuse(records, {
+          threshold: 0.4,
+          ignoreLocation: true,
+          keys: [
+            { name: 'title', weight: 0.6 },
+            { name: 'tags.label', weight: 0.3 },
+            { name: 'excerpt', weight: 0.1 },
+          ],
+        });
+      }
+      return fuse;
+    }
+
+    function showDefault() {
+      results!.hidden = true;
+      results!.innerHTML = '';
+      status!.hidden = true;
+      if (defaultList) defaultList.hidden = false;
+      if (pagination) pagination.hidden = false;
+    }
+
+    async function run(query: string) {
+      const q = query.trim();
+      if (!q) {
+        showDefault();
+        return;
+      }
+      const hits = (await ensureFuse()).search(q).map((r) => r.item);
+      if (defaultList) defaultList.hidden = true;
+      if (pagination) pagination.hidden = true;
+
+      if (hits.length === 0) {
+        results!.hidden = true;
+        results!.innerHTML = '';
+        status!.textContent = `${noResultsText} “${q}”`;
+        status!.hidden = false;
+        return;
+      }
+      status!.hidden = true;
+      results!.innerHTML = hits.map(renderCard).join('');
+      results!.hidden = false;
+    }
+
+    input.addEventListener('input', () => void run(input.value));
+    root.dataset.bound = 'true';
+  }
+
+  document.addEventListener('astro:page-load', setup);
+</script>

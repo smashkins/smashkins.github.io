@@ -29,6 +29,11 @@ type UIStrings = {
     noTranslation: string;
     toTop: string;
   };
+  search: {
+    label: string;
+    placeholder: string;
+    noResults: string;
+  };
 };
 
 export const ui: Record<Locale, UIStrings> = {
@@ -51,6 +56,11 @@ export const ui: Record<Locale, UIStrings> = {
       noTranslation: 'No translation available — opening the blog index instead.',
       toTop: 'Back to top',
     },
+    search: {
+      label: 'Search the blog',
+      placeholder: 'Search posts, tags…',
+      noResults: 'No posts match',
+    },
   },
   it: {
     nav: { home: 'Home', blog: 'Blog', classic: 'Classic', contact: 'Contatto' },
@@ -70,6 +80,11 @@ export const ui: Record<Locale, UIStrings> = {
       updated: 'Aggiornato',
       noTranslation: 'Nessuna traduzione disponibile — apro invece l’indice del blog.',
       toTop: 'Torna su',
+    },
+    search: {
+      label: 'Cerca nel blog',
+      placeholder: 'Cerca articoli, tag…',
+      noResults: 'Nessun articolo corrisponde a',
     },
   },
 };
