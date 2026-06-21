@@ -253,10 +253,7 @@ But a richer vocabulary does not make the model more variable on the same input.
 So the vocabulary controls what the model is capable of. The temperature controls how unpredictable it is. They are different dials, and they often pull in opposite directions. A wide vocabulary at temperature zero gives you a system that is expressive and deterministic at the same time, which for a production interface is frequently exactly the combination you want.
 
 
-<figure><img src="/assets/blog/generative-ui/3b9e5865a241.png" alt="Top ten cities AI UI Generated" /><figcaption>Top ten cities AI UI Generated</figcaption></figure>
-
-
-<figure><img src="/assets/blog/generative-ui/41dcd7d4f153.png" alt="A dashboard generated locally by AI" /><figcaption>A dashboard generated locally by AI</figcaption></figure>
+<div class="post-columns"><div class="post-column"><figure><img src="/assets/blog/generative-ui/3b9e5865a241.png" alt="Top ten cities AI UI Generated" /><figcaption>Top ten cities AI UI Generated</figcaption></figure></div><div class="post-column"><figure><img src="/assets/blog/generative-ui/41dcd7d4f153.png" alt="A dashboard generated locally by AI" /><figcaption>A dashboard generated locally by AI</figcaption></figure></div></div>
 
 
 ## iOS 27: the model that composes is now swappable

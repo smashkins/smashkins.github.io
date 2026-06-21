@@ -5,9 +5,11 @@ export interface Props {
   headings: MarkdownHeading[];
   label: string;
   variant: 'mobile' | 'desktop';
+  /** Ordered milestone phrases for the reading-progress meter (desktop only). */
+  progress?: string[];
 }
 
-const { headings, label, variant } = Astro.props;
+const { headings, label, variant, progress } = Astro.props;
 const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
@@ -32,6 +34,21 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 {
   items.length > 0 && variant === 'desktop' && (
     <aside class="post-toc post-toc--desktop" aria-label={label}>
+      {progress && progress.length > 0 && (
+        <div
+          class="reading-progress"
+          data-reading-progress
+          data-progress-phrases={JSON.stringify(progress)}
+        >
+          <div class="reading-progress__head">
+            <span class="reading-progress__label" data-progress-label>{progress[0]}</span>
+            <span class="reading-progress__pct" data-progress-pct>0%</span>
+          </div>
+          <div class="reading-progress__track">
+            <span class="reading-progress__bar" data-progress-bar />
+          </div>
+        </div>
+      )}
       <p class="post-toc__label">{label}</p>
       <ol class="post-toc__list">
         {items.map((h, i) => (
@@ -103,8 +120,79 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     observer = null;
   }
 
+  // Reading-progress meter: track how far through the article body the viewport
+  // has scrolled, updating the bar/percentage/label. rAF-throttled scroll work.
+  let rpCleanup: (() => void) | null = null;
+
+  function initProgress() {
+    const widget = document.querySelector<HTMLElement>('[data-reading-progress]');
+    const body = document.querySelector<HTMLElement>('.post-body');
+    if (!widget || !body) return;
+    const bar = widget.querySelector<HTMLElement>('[data-progress-bar]');
+    const pctEl = widget.querySelector<HTMLElement>('[data-progress-pct]');
+    const labelEl = widget.querySelector<HTMLElement>('[data-progress-label]');
+    if (!bar || !pctEl || !labelEl) return;
+
+    /** @type {string[]} */
+    let phrases: string[] = [];
+    try {
+      phrases = JSON.parse(widget.dataset.progressPhrases || '[]');
+    } catch {
+      phrases = [];
+    }
+    // Spread the leading phrases evenly across 0–99%; the final phrase is
+    // reserved for 100%, so the label changes several times as you scroll.
+    const phraseFor = (pct: number) => {
+      if (phrases.length === 0) return '';
+      if (pct >= 100) return phrases[phrases.length - 1];
+      const bands = Math.max(1, phrases.length - 1);
+      return phrases[Math.min(bands - 1, Math.floor((pct / 100) * bands))];
+    };
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rect = body.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const span = body.offsetHeight;
+      const viewBottom = window.scrollY + window.innerHeight;
+      const p = span > 0 ? Math.max(0, Math.min(1, (viewBottom - top) / span)) : 1;
+      const pct = Math.round(p * 100);
+      bar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+      labelEl.textContent = phraseFor(pct);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+
+    rpCleanup = () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }
+
+  function teardownProgress() {
+    rpCleanup?.();
+    rpCleanup = null;
+  }
+
+  function init() {
+    initToc();
+    initProgress();
+  }
+  function teardown() {
+    teardownToc();
+    teardownProgress();
+  }
+
   // PostTOC only renders on blog post pages, which have ClientRouter, so
   // `astro:page-load` fires on the initial load and after every swap.
-  document.addEventListener('astro:page-load', initToc);
-  document.addEventListener('astro:before-swap', teardownToc);
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', teardown);
 </script>

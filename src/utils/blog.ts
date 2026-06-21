@@ -59,6 +59,22 @@ export function getRelatedPosts(
   return scored.slice(0, max).map((s) => s.post);
 }
 
+/** Deterministic, monochrome cover fallback for posts without an `image`. */
+export interface CoverPlaceholder {
+  angle: number;
+  monogram: string;
+}
+
+/**
+ * Derive a stable gradient angle + monogram from a post title, so an imageless
+ * card always renders the same (and subtly distinct) placeholder cover.
+ */
+export function coverPlaceholder(title: string): CoverPlaceholder {
+  let h = 0;
+  for (let i = 0; i < title.length; i++) h = (h * 31 + title.charCodeAt(i)) >>> 0;
+  return { angle: h % 360, monogram: (title.trim()[0] ?? '·').toUpperCase() };
+}
+
 /** One post as it appears in the client-side search index. */
 export interface SearchRecord {
   title: string;
@@ -67,6 +83,9 @@ export interface SearchRecord {
   href: string;
   dateISO: string;
   dateLabel: string;
+  image?: string;
+  coverAngle: number;
+  coverMonogram: string;
 }
 
 /**
@@ -78,17 +97,23 @@ export async function buildSearchIndex(locale: Locale): Promise<SearchRecord[]> 
   const posts = await getPosts(locale);
   const dateLocale = locale === 'it' ? 'it-IT' : 'en-GB';
 
-  return posts.map((entry) => ({
-    title: entry.data.title,
-    excerpt: entry.data.excerpt,
-    tags: entry.data.tags.slice(0, 3).map((tag) => ({
-      label: tag,
-      href: localizedHref(`/blog/tags/${tagSlug(tag)}/`, locale),
-    })),
-    href: localizedHref(`/blog/${slugOf(entry)}/`, locale),
-    dateISO: entry.data.publishDate.toISOString(),
-    dateLabel: entry.data.publishDate
-      .toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })
-      .toUpperCase(),
-  }));
+  return posts.map((entry) => {
+    const { angle, monogram } = coverPlaceholder(entry.data.title);
+    return {
+      title: entry.data.title,
+      excerpt: entry.data.excerpt,
+      tags: entry.data.tags.slice(0, 3).map((tag) => ({
+        label: tag,
+        href: localizedHref(`/blog/tags/${tagSlug(tag)}/`, locale),
+      })),
+      href: localizedHref(`/blog/${slugOf(entry)}/`, locale),
+      dateISO: entry.data.publishDate.toISOString(),
+      dateLabel: entry.data.publishDate
+        .toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })
+        .toUpperCase(),
+      image: entry.data.image,
+      coverAngle: angle,
+      coverMonogram: monogram,
+    };
+  });
 }

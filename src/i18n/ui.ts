@@ -29,6 +29,8 @@ type UIStrings = {
     noTranslation: string;
     toTop: string;
     comments: string;
+    /** Ordered milestone phrases for the reading meter; last entry = 100%. */
+    progress: string[];
   };
   search: {
     label: string;
@@ -39,12 +41,12 @@ type UIStrings = {
 
 export const ui: Record<Locale, UIStrings> = {
   en: {
-    nav: { home: 'Home', blog: 'Blog', classic: 'Classic', contact: 'Contact' },
+    nav: { home: 'Home', blog: 'Articles', classic: 'Classic', contact: 'Contact' },
     blog: {
-      eyebrow: 'Dispatch · Blog',
-      title: 'Blog',
-      subtitle: 'Field notes on Apple platforms, Swift, and building MONOIDX.',
-      backToBlog: 'Back to blog',
+      eyebrow: 'Dispatch · Articles',
+      title: 'Articles',
+      subtitle: 'Field notes on Apple platforms, Swift, AI and everything else.',
+      backToBlog: 'Back to articles',
       backToHome: 'Back to home',
       minRead: 'min read',
       contents: 'Contents',
@@ -54,23 +56,34 @@ export const ui: Record<Locale, UIStrings> = {
       next: 'Next',
       page: 'Page',
       updated: 'Updated',
-      noTranslation: 'No translation available — opening the blog index instead.',
+      noTranslation: 'No translation available — opening the articles index instead.',
       toTop: 'Back to top',
       comments: 'Comments',
+      progress: [
+        'Just started',
+        'Settling in',
+        'Warming up',
+        'Keep going',
+        'Past halfway',
+        'Picking up',
+        'Almost there',
+        'Nearly done',
+        'Finished',
+      ],
     },
     search: {
-      label: 'Search the blog',
+      label: 'Search articles',
       placeholder: 'Search posts, tags…',
       noResults: 'No posts match',
     },
   },
   it: {
-    nav: { home: 'Home', blog: 'Blog', classic: 'Classic', contact: 'Contatto' },
+    nav: { home: 'Home', blog: 'Articoli', classic: 'Classic', contact: 'Contatto' },
     blog: {
-      eyebrow: 'Dispaccio · Blog',
-      title: 'Blog',
-      subtitle: 'Appunti su piattaforme Apple, Swift e la costruzione di MONOIDX.',
-      backToBlog: 'Torna al blog',
+      eyebrow: 'Dispaccio · Articoli',
+      title: 'Articoli',
+      subtitle: 'Appunti su piattaforme Apple, Swift, AI e tutto il resto.',
+      backToBlog: 'Torna agli articoli',
       backToHome: 'Torna alla home',
       minRead: 'min di lettura',
       contents: 'Indice',
@@ -80,12 +93,23 @@ export const ui: Record<Locale, UIStrings> = {
       next: 'Successivo',
       page: 'Pagina',
       updated: 'Aggiornato',
-      noTranslation: 'Nessuna traduzione disponibile — apro invece l’indice del blog.',
+      noTranslation: 'Nessuna traduzione disponibile — apro invece l’indice degli articoli.',
       toTop: 'Torna su',
       comments: 'Commenti',
+      progress: [
+        'Appena iniziato',
+        'Ci si avvia',
+        'Si scalda',
+        'Continua',
+        'Oltre metà',
+        'Si accelera',
+        'Ci siamo quasi',
+        'Quasi finito',
+        'Finito',
+      ],
     },
     search: {
-      label: 'Cerca nel blog',
+      label: 'Cerca tra gli articoli',
       placeholder: 'Cerca articoli, tag…',
       noResults: 'Nessun articolo corrisponde a',
     },

@@ -58,6 +58,9 @@ const strings = t(locale);
     href: string;
     dateISO: string;
     dateLabel: string;
+    image?: string;
+    coverAngle: number;
+    coverMonogram: string;
   }
 
   // Cache fetched indices across view-transition navigations (the module is
@@ -91,9 +94,13 @@ const strings = t(locale);
       .join('');
     const tagList = tags ? `<ul class="post-card__tags">${tags}</ul>` : '';
     const title = escapeHtml(rec.title);
+    const cover = rec.image
+      ? `<img src="${escapeHtml(rec.image)}" alt="" loading="lazy" />`
+      : `<div class="post-card__cover-ph" style="--ph-angle:${rec.coverAngle}deg"><span>${escapeHtml(rec.coverMonogram)}</span></div>`;
 
     return `<article class="post-card">
         <a class="post-card__link" href="${escapeHtml(rec.href)}" aria-label="${title}"></a>
+        <div class="post-card__cover">${cover}</div>
         <div class="post-card__date">
           <span class="post-meta"><time datetime="${escapeHtml(rec.dateISO)}">${escapeHtml(rec.dateLabel)}</time></span>
         </div>

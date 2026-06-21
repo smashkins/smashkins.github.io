@@ -101,19 +101,13 @@ const hero = entry.data.image;
       )}
     </header>
 
-    {hero && (
-      <figure class="post-hero">
-        <img src={hero} alt={entry.data.title} loading="eager" />
-      </figure>
-    )}
-
     <PostTOC headings={headings} label={tocLabel} variant="mobile" />
 
     <div class="post-grid">
       <div class="post-body">
         <Content />
       </div>
-      <PostTOC headings={headings} label={tocLabel} variant="desktop" />
+      <PostTOC headings={headings} label={tocLabel} variant="desktop" progress={strings.blog.progress} />
     </div>
 
     <RelatedPosts posts={related} locale={LOCALE} />

@@ -223,29 +223,54 @@
 }
 .post-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 180px 1fr auto;
-  gap: 36px;
-  align-items: baseline;
-  padding: clamp(26px, 3.2vw, 40px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(30px, 4vw, 48px) 0;
   border-bottom: 1px solid var(--line);
-}
-/* hover slide via transform on the children (not padding): transforms don't
-   reflow the grid, so the title never rewraps mid-hover; the hairline rule
-   stays put while the content glides */
-.post-card > :not(.post-card__link) {
-  transition: transform 0.5s var(--ease);
-}
-.post-card:hover > :not(.post-card__link) {
-  transform: translateX(16px);
 }
 .post-card__link {
   position: absolute;
   inset: 0;
   z-index: 1;
 }
-.post-card__date {
-  padding-top: 6px;
+/* full-width cover banner, fixed height; the image fills the box (cropping
+   overflow) and zooms subtly on hover from inside an overflow-clipped frame */
+.post-card__cover {
+  width: 100%;
+  height: clamp(200px, 26vw, 320px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.post-card__cover img,
+.post-card__cover-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease);
+}
+.post-card:hover .post-card__cover img,
+.post-card:hover .post-card__cover-ph {
+  transform: scale(1.04);
+}
+/* monochrome fallback cover for imageless posts: a faint title monogram on a
+   graphite gradient whose angle varies per post (set inline via --ph-angle) */
+.post-card__cover-ph {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(var(--ph-angle, 135deg), var(--charcoal), var(--graphite-2));
+}
+.post-card__cover-ph span {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(44px, 7vw, 88px);
+  letter-spacing: -0.03em;
+  color: var(--txt-3);
+  transition: color 0.4s var(--ease);
+}
+.post-card:hover .post-card__cover-ph span {
+  color: var(--txt-2);
 }
 .post-card__title {
   font-family: var(--display);
@@ -269,9 +294,11 @@
 }
 .post-card__aside {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
+  width: 100%;
   position: relative;
   z-index: 2;
 }
@@ -279,7 +306,7 @@
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
 }
 .post-card__arrow {
@@ -397,15 +424,6 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--txt-3);
-}
-
-.post-hero {
-  margin-bottom: clamp(40px, 5vw, 64px);
-}
-.post-hero img {
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--line);
 }
 
 /* layout grid: body + sticky toc */
@@ -536,8 +554,40 @@
   height: auto;
   border: 1px solid var(--line);
 }
+/* Inline body images read as editorial screenshots: centered and capped so a
+   portrait shot doesn't go full-bleed. A {w=NNN} hint in the Notion caption
+   overrides the width via --fig-w (Notion's API doesn't expose drag sizes).
+   .post-body > * + * keeps the vertical rhythm, so only the inline axis here. */
 .post-body figure {
-  margin: 0; /* reset default; .post-body > * + * keeps the vertical rhythm */
+  margin-block: 0;
+  margin-inline: auto;
+  max-width: min(100%, var(--fig-w, 460px));
+}
+.post-body p:has(img) {
+  text-align: center;
+}
+.post-body p img {
+  max-width: min(100%, var(--fig-w, 460px));
+}
+/* Notion column layouts: a row of equal tracks, each image filling its track
+   (the single-image cap above is lifted inside a column). Stacks on mobile. */
+.post-body .post-columns {
+  display: flex;
+  gap: clamp(16px, 2.5vw, 28px);
+  align-items: flex-start;
+}
+.post-body .post-column {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.post-body .post-columns figure {
+  max-width: none;
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .post-body .post-columns {
+    flex-direction: column;
+  }
 }
 .post-body figcaption {
   margin-top: 12px;
@@ -547,6 +597,40 @@
   text-transform: uppercase;
   line-height: 1.5;
   color: var(--txt-3);
+}
+
+/* ---------- reading progress (top of desktop TOC) ---------- */
+.reading-progress {
+  margin-bottom: 22px;
+}
+.reading-progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.reading-progress__label {
+  color: var(--txt-3);
+}
+.reading-progress__pct {
+  color: var(--txt-1);
+  font-variant-numeric: tabular-nums;
+}
+.reading-progress__track {
+  height: 2px;
+  background: var(--line-2);
+  overflow: hidden;
+}
+.reading-progress__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--silver);
+  transition: width 0.15s linear;
 }
 
 /* ---------- table of contents ---------- */
@@ -913,20 +997,7 @@ a.post-nav__row--next:hover .post-nav__arrow {
     justify-content: flex-start;
   }
   .post-card {
-    grid-template-columns: 1fr;
     gap: 14px;
-  }
-  .post-card__date {
-    padding-top: 0;
-  }
-  .post-card__aside {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-  .post-card__tags {
-    justify-content: flex-start;
   }
   .related__link {
     grid-template-columns: 1fr auto;

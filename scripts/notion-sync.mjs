@@ -278,6 +278,28 @@ async function downloadImage(rawUrl, slug) {
 // ---------------------------------------------------------------------------
 
 /**
+ * List all direct child blocks of a block id, following pagination.
+ * @param {Client} notion @param {string} blockId
+ * @returns {Promise<any[]>}
+ */
+async function listChildBlocks(notion, blockId) {
+  /** @type {any[]} */
+  const out = [];
+  /** @type {string | undefined} */
+  let cursor;
+  do {
+    const res = await notion.blocks.children.list({
+      block_id: blockId,
+      start_cursor: cursor,
+      page_size: 100,
+    });
+    out.push(...res.results);
+    cursor = res.has_more && res.next_cursor ? res.next_cursor : undefined;
+  } while (cursor);
+  return out;
+}
+
+/**
  * Build a NotionToMarkdown converter whose image transformer downloads each
  * image locally and emits a Markdown image with the local path.
  * @param {Client} notion
@@ -293,17 +315,51 @@ function makeConverter(notion, slug) {
     if (!url) return false;
     // Caption is flattened to plain text; rich formatting/links in a caption
     // are not preserved.
-    const caption = Array.isArray(image.caption)
+    let caption = Array.isArray(image.caption)
       ? image.caption.map((/** @type {{ plain_text?: string }} */ c) => c.plain_text ?? '').join('').trim()
       : '';
+    // Notion's API does not expose the width set by dragging an image smaller,
+    // so a trailing {w=NNN} (or {width=NNN}) hint in the caption carries an
+    // explicit display width through to the figure (--fig-w, see blog.css).
+    let figStyle = '';
+    const wMatch = caption.match(/\{\s*w(?:idth)?\s*=\s*(\d{2,4})\s*\}\s*$/i);
+    if (wMatch) {
+      figStyle = ` style="--fig-w:${wMatch[1]}px"`;
+      caption = caption.slice(0, wMatch.index).trim();
+    }
     const localRef = await downloadImage(url, slug);
-    // With a caption, emit a single-line raw-HTML figure so the caption renders
-    // visibly beneath the image (Astro renders raw HTML in .md; a single line
+    // With a caption (or width hint) emit a single-line raw-HTML figure so it
+    // renders as an HTML block (Astro renders raw HTML in .md; a single line
     // surrounded by the \n\n block join is treated as an HTML block, not wrapped
-    // in <p>). Without one, a plain image with empty alt (no descriptive source).
-    if (!caption) return `![](${localRef})`;
-    return `<figure><img src="${localRef}" alt="${escapeAttr(caption)}" /><figcaption>${escapeText(caption)}</figcaption></figure>`;
+    // in <p>). Otherwise a plain image with empty alt (no descriptive source).
+    if (!caption && !figStyle) return `![](${localRef})`;
+    const figcaption = caption ? `<figcaption>${escapeText(caption)}</figcaption>` : '';
+    return `<figure${figStyle}><img src="${localRef}" alt="${escapeAttr(caption)}" />${figcaption}</figure>`;
   });
+
+  // Notion column layouts (e.g. two images side by side) otherwise flatten to a
+  // vertical stack in plain Markdown. Preserve them as a row the stylesheet lays
+  // out (.post-columns / .post-column in blog.css), converting each column's own
+  // blocks through the same pipeline so nested images still download.
+  n2m.setCustomTransformer('column_list', async (block) => {
+    try {
+      const columns = await listChildBlocks(notion, /** @type {any} */ (block).id);
+      /** @type {string[]} */
+      const cols = [];
+      for (const col of columns) {
+        if (/** @type {any} */ (col).type !== 'column') continue;
+        const content = await listChildBlocks(notion, /** @type {any} */ (col).id);
+        const mdBlocks = await n2m.blocksToMarkdown(content);
+        const colMd = (n2m.toMarkdownString(mdBlocks).parent ?? '').trim();
+        if (colMd) cols.push(`<div class="post-column">${colMd}</div>`);
+      }
+      if (!cols.length) return false; // nothing usable; let n2m handle it
+      return `<div class="post-columns">${cols.join('')}</div>`;
+    } catch {
+      return false; // on any failure, fall back to the default (flattened) output
+    }
+  });
+
   return n2m;
 }
 

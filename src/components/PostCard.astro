@@ -1,6 +1,6 @@
 ---
 import { type Locale, localizedHref } from '~/i18n';
-import { slugOf, tagSlug, type BlogEntry } from '~/utils/blog';
+import { slugOf, tagSlug, coverPlaceholder, type BlogEntry } from '~/utils/blog';
 import PostMeta from '~/components/PostMeta.astro';
 
 export interface Props {
@@ -12,10 +12,21 @@ const { entry, locale } = Astro.props;
 const slug = slugOf(entry);
 const href = localizedHref(`/blog/${slug}/`, locale);
 const tags = entry.data.tags.slice(0, 3);
+const image = entry.data.image;
+const { angle, monogram } = coverPlaceholder(entry.data.title);
 ---
 
 <article class="post-card">
   <a class="post-card__link" href={href} aria-label={entry.data.title}></a>
+  <div class="post-card__cover">
+    {image ? (
+      <img src={image} alt="" loading="lazy" />
+    ) : (
+      <div class="post-card__cover-ph" style={`--ph-angle:${angle}deg`}>
+        <span>{monogram}</span>
+      </div>
+    )}
+  </div>
   <div class="post-card__date">
     <PostMeta date={entry.data.publishDate} locale={locale} />
   </div>
