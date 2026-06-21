@@ -670,6 +670,22 @@
   transform: translateX(6px);
 }
 
+/* ---------- comments (giscus) ---------- */
+.post-comments {
+  margin-top: clamp(56px, 8vw, 96px);
+  padding-top: clamp(40px, 6vw, 64px);
+  border-top: 1px solid var(--line);
+}
+.post-comments__label {
+  margin-bottom: 28px;
+}
+/* giscus injects its own iframe; just guarantee it spans the column. */
+.post-comments [data-giscus],
+.post-comments .giscus,
+.post-comments .giscus-frame {
+  width: 100%;
+}
+
 /* ---------- prev / next ---------- */
 .post-nav {
   display: grid;

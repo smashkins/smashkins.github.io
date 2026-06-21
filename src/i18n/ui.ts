@@ -28,6 +28,7 @@ type UIStrings = {
     updated: string;
     noTranslation: string;
     toTop: string;
+    comments: string;
   };
   search: {
     label: string;
@@ -55,6 +56,7 @@ export const ui: Record<Locale, UIStrings> = {
       updated: 'Updated',
       noTranslation: 'No translation available — opening the blog index instead.',
       toTop: 'Back to top',
+      comments: 'Comments',
     },
     search: {
       label: 'Search the blog',
@@ -80,6 +82,7 @@ export const ui: Record<Locale, UIStrings> = {
       updated: 'Aggiornato',
       noTranslation: 'Nessuna traduzione disponibile — apro invece l’indice del blog.',
       toTop: 'Torna su',
+      comments: 'Commenti',
     },
     search: {
       label: 'Cerca nel blog',
