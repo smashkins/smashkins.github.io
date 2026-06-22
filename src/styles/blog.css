@@ -118,6 +118,20 @@
   line-height: 1.04;
   color: var(--txt-1);
 }
+.blog-header__cursor {
+  display: inline-block;
+  margin-left: 0.06em;
+  color: var(--txt-1);
+  font-weight: 400;
+  animation: blog-cursor-blink 1.06s steps(1, end) infinite;
+}
+@keyframes blog-cursor-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blog-header__cursor { animation: none; }
+}
 .blog-header__subtitle {
   font-size: clamp(17px, 2vw, 21px);
   font-weight: 300;

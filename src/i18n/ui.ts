@@ -43,7 +43,7 @@ export const ui: Record<Locale, UIStrings> = {
   en: {
     nav: { home: 'Home', blog: 'Articles', classic: 'Classic', contact: 'Contact' },
     blog: {
-      eyebrow: 'Dispatch · Articles',
+      eyebrow: 'Dispatch Unit · Articles',
       title: 'Articles',
       subtitle: 'Field notes on Apple platforms, Swift, AI and everything else.',
       backToBlog: 'Back to articles',
@@ -80,7 +80,7 @@ export const ui: Record<Locale, UIStrings> = {
   it: {
     nav: { home: 'Home', blog: 'Articoli', classic: 'Classic', contact: 'Contatto' },
     blog: {
-      eyebrow: 'Dispaccio · Articoli',
+      eyebrow: 'Dispatch Unit · Articoli',
       title: 'Articoli',
       subtitle: 'Appunti su piattaforme Apple, Swift, AI e tutto il resto.',
       backToBlog: 'Torna agli articoli',
