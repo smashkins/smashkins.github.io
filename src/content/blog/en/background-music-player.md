@@ -6,6 +6,7 @@ tags:
   - astro
   - engineering
   - monoidx
+image: /assets/blog/background-music-player/2f4688e4910c.png
 lang: en
 notionId: 37fa9c08-e476-816d-9cc5-db22620e324d
 ---

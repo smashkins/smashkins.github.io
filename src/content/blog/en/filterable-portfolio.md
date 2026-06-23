@@ -6,6 +6,7 @@ tags:
   - astro
   - engineering
   - monoidx
+image: /assets/blog/filterable-portfolio/4ee80bb2911d.jpg
 lang: en
 notionId: 388a9c08-e476-81da-b731-edf4cffc7ee7
 ---
