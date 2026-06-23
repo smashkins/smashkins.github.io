@@ -180,6 +180,84 @@ Worker** that validates Notion's webhook signature and calls
 
 ---
 
+## Add a portfolio project
+
+The **Portfolio** section on the landing page (and each project's detail HUD) is
+driven entirely by **`src/data/portfolio.md`** — a single editable Markdown file
+(YAML frontmatter), the same pattern as `src/data/resume.md`. The layout is
+fixed; only this file's content changes. **The order of `projects` in the file
+is the order shown on the page.**
+
+Clicking a project card opens a centered, translucent **detail HUD** (fade in /
+fade out) showing that project's platform, title, date, description, optional
+spec rows, images and links.
+
+### Frontmatter
+
+```yaml
+---
+eyebrow: "Section 05 — Portfolio"   # optional — section eyebrow label
+title: "Selected Work"              # optional — section heading
+intro: "One-line section lede."      # optional — paragraph under the heading
+
+projects:
+  - slug: "project-one"            # required — unique, kebab-case; ties card → HUD + image folder
+    platform: "iOS · SwiftUI"      # required — card tag + HUD eyebrow
+    title: "Project One"           # required
+    date: "2024"                   # optional — shown top-right in the HUD
+    summary: "Shown on the card."  # required — one line on the grid card
+    description: "Longer write-up shown in the HUD."   # optional — paragraph
+    specs:                          # optional — label/value rows in the HUD
+      - label: "Platform"
+        value: "iOS 17 · iPadOS"
+      - label: "Stack"
+        value: "Swift · SwiftUI · Core Data"
+    images:                         # optional — absolute paths (see below)
+      - "/assets/portfolio/project-one/01.jpg"
+    videos:                         # optional — mp4 files (see below)
+      - src: "/assets/portfolio/project-one/demo.mp4"
+        poster: "/assets/portfolio/project-one/demo-poster.jpg"   # optional
+    links:                          # optional — external links (open in a new tab)
+      - label: "App Store"
+        href: "https://…"
+---
+```
+
+| Field | Required | Notes |
+|---|---|---|
+| `slug` | yes | unique, kebab-case; also the image sub-folder name |
+| `platform` | yes | card tag and HUD eyebrow (e.g. `iOS · SwiftUI`) |
+| `title` | yes | project name |
+| `summary` | yes | one line shown on the grid card |
+| `date` | no | shown top-right in the HUD |
+| `description` | no | paragraph shown in the HUD |
+| `specs` | no | list of `{ label, value }` rows (monoidx readout style) |
+| `images` | no | list of absolute image paths (see below) |
+| `videos` | no | list of mp4s — each a path string **or** `{ src, poster }` (poster optional) |
+| `links` | no | list of `{ label, href }`; open in a new tab |
+
+Keep every value **in quotes** (as in the file) so YAML never chokes on
+characters like `:`, `&`, `·` or `#`.
+
+### Images
+
+Drop project images under **`public/assets/portfolio/<slug>/`** and reference
+them with an **absolute path**, e.g. `/assets/portfolio/project-one/01.jpg`.
+Like the blog and canvas-frame assets, anything in `public/` is copied into
+`dist/` verbatim (never fingerprinted), so the string paths keep working. Images
+are lazy-loaded and stack vertically in the HUD.
+
+### Videos
+
+`videos` work the same way — drop **`.mp4`** files under
+`public/assets/portfolio/<slug>/` and list them under `videos` (a plain path
+string, or `{ src, poster }` to set a poster frame). They render after the
+images in the HUD, **autoplay muted and loop** when the project opens (with
+controls so the visitor can pause/unmute), and pause when the HUD closes. Under
+"reduce motion" they don't autoplay.
+
+---
+
 ## Deployment
 
 The site deploys via **GitHub Actions** (Pages Source = GitHub Actions):

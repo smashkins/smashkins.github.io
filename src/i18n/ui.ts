@@ -11,7 +11,7 @@ export const localeName: Record<Locale, string> = {
 };
 
 type UIStrings = {
-  nav: { home: string; blog: string; classic: string; contact: string };
+  nav: { home: string; blog: string; contact: string };
   blog: {
     eyebrow: string;
     title: string;
@@ -41,7 +41,7 @@ type UIStrings = {
 
 export const ui: Record<Locale, UIStrings> = {
   en: {
-    nav: { home: 'Home', blog: 'Articles', classic: 'Classic', contact: 'Contact' },
+    nav: { home: 'Home', blog: 'Articles', contact: 'Contact' },
     blog: {
       eyebrow: 'Dispatch Unit · Articles',
       title: 'Articles',
@@ -78,7 +78,7 @@ export const ui: Record<Locale, UIStrings> = {
     },
   },
   it: {
-    nav: { home: 'Home', blog: 'Articoli', classic: 'Classic', contact: 'Contatto' },
+    nav: { home: 'Home', blog: 'Articoli', contact: 'Contatto' },
     blog: {
       eyebrow: 'Dispatch Unit · Articoli',
       title: 'Articoli',

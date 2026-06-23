@@ -14,10 +14,12 @@ const { label } = Astro.props;
   // View-transition-safe: re-init on every page load and tear down the window
   // scroll listener before a swap so it never leaks across navigations.
   let onScroll: (() => void) | null = null;
+  let bound = false;
 
   function initToTop() {
     const btn = document.querySelector<HTMLButtonElement>('[data-to-top]');
-    if (!btn) return;
+    if (!btn || bound) return;
+    bound = true;
     onScroll = () => {
       btn.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.8);
     };
@@ -25,6 +27,11 @@ const { label } = Astro.props;
     onScroll();
 
     btn.addEventListener('click', () => {
+      // On the landing, ScrollTrigger pinning cancels native smooth scroll, so
+      // it exposes a gsap-driven scroller — prefer it when present (blog pages
+      // have no pin and fall back to native smooth scroll).
+      const mx = (window as any).__mxSmoothScrollTo;
+      if (typeof mx === 'function') { mx(0); return; }
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
     });
@@ -35,10 +42,16 @@ const { label } = Astro.props;
       window.removeEventListener('scroll', onScroll);
       onScroll = null;
     }
+    bound = false;
   }
 
-  // ToTop only renders on blog pages, which have ClientRouter, so
-  // `astro:page-load` fires on the initial load and after every swap.
+  // Blog pages have ClientRouter, so `astro:page-load` fires on the initial
+  // load and after every swap.
   document.addEventListener('astro:page-load', initToTop);
   document.addEventListener('astro:before-swap', teardownToTop);
+  // The landing page uses BaseLayout (no ClientRouter), where `astro:page-load`
+  // never fires — init directly. The `bound` guard keeps this from double-binding
+  // alongside `astro:page-load` on router pages.
+  if (document.readyState !== 'loading') initToTop();
+  else document.addEventListener('DOMContentLoaded', initToTop);
 </script>
