@@ -750,7 +750,7 @@ function stPinSane(){
   return st && Math.abs(st.start) < 5 && (st.end - st.start) > window.innerHeight * 2;
 }
 function openResumeDeepLink(){
-  if (!drawer) return;
+  if (!drawer || resumeDeepLinkActive) return;   // idempotent: ignore re-entry while a deep-link is settling
   resumeDeepLinkActive = true;
   window.scrollTo(0, 0);                                  // clean state for ScrollTrigger to measure
   if (panelProgress < 1 && !snapTween){ currentIdx = EXP_IDX; snapTo(1); }   // open the panel right away
@@ -774,6 +774,20 @@ function maybeOpenResumeFromHash(){
 }
 on(window, "load", () => { setTimeout(maybeOpenResumeFromHash, 200); });
 on(window, "hashchange", maybeOpenResumeFromHash);
+// Nav "Resume" links point at /#resume. On the landing that is a same-page hash
+// change, which the ClientRouter applies via history state without firing a
+// `hashchange` event — so wire the click straight to the panel instead.
+$$('a[href$="#resume"]').forEach((a) => {
+  on(a, "click", (e) => {
+    if (a.pathname !== location.pathname) return;   // off-page link → let it navigate
+    e.preventDefault();
+    if (location.hash !== "#resume") history.replaceState(null, "", "#resume");
+    openResumeDeepLink();
+  });
+});
+// Arriving on the landing via a client-side swap (e.g. from the blog) can land
+// with #resume already in the URL, where neither `load` nor `hashchange` fires.
+if (location.hash === "#resume") setTimeout(maybeOpenResumeFromHash, 200);
 }
 
 document.addEventListener("astro:page-load", initLanding);
