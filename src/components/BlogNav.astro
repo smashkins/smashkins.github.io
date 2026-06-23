@@ -31,6 +31,7 @@ const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
     <div class="blog-nav__cluster-row">
       <div class="blog-nav__links" id="blog-nav-menu" data-nav-menu>
         <a href={blogHref}>{strings.nav.blog}</a>
+        <a href="/#resume">Resume</a>
         <span class="blog-nav__switch">
           <a href={enPath} class={locale === 'en' ? 'is-active' : undefined} hreflang="en">EN</a>
           <span class="blog-nav__sep">/</span>
