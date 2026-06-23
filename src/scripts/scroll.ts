@@ -444,10 +444,20 @@ if (outroBg){
   });
 }
 $$(".anim-up").forEach(el => {
-  gsap.from(el, {
-    autoAlpha: 0, y: 40, duration: 1, ease: "power2.out",
-    scrollTrigger: { trigger: el, start: "top 85%" }
-  });
+  // fromTo (not from): pin the end state explicitly to autoAlpha:1 / y:0. A bare
+  // gsap.from() captures the element's CURRENT values as the destination — and
+  // initLanding runs twice on a landing visit (the module's own call, then
+  // astro:page-load), so on the second pass the element is still sitting in the
+  // first pass's from-state (opacity:0). from() would then animate 0 → 0 and
+  // strand the heading invisible (the cards escape only because pfRender
+  // force-sets them). An explicit destination is immune to that leftover state.
+  gsap.fromTo(el,
+    { autoAlpha: 0, y: 40 },
+    {
+      autoAlpha: 1, y: 0, duration: 1, ease: "power2.out", overwrite: "auto",
+      scrollTrigger: { trigger: el, start: "top 85%" }
+    }
+  );
 });
 if (ghost) ghost.textContent = "MX";
 
