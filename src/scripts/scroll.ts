@@ -1,3 +1,7 @@
+// @ts-nocheck
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+
 /* ===================== MONOIDX — scroll sequence (GSAP + ScrollTrigger) ===================== */
 /* iOS-safe: scrubs a preloaded image sequence on a <canvas> instead of a <video>. */
 gsap.registerPlugin(ScrollTrigger);
@@ -25,6 +29,74 @@ const ghost     = $("#ghost");
 
 railSegs.forEach((seg, i) => { seg.querySelector("span").textContent = LABELS[i]; });
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- dialog focus helpers ---------- */
+const FOCUSABLE = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
+let activeDialog = null;
+let lastFocusedBeforeDialog = null;
+
+function visibleFocusable(root){
+  if (!root) return [];
+  return $$(FOCUSABLE).filter((el) => root.contains(el) && el.offsetParent !== null);
+}
+function focusDialog(root, preferred){
+  const target = preferred || visibleFocusable(root)[0] || root;
+  if (!target.hasAttribute("tabindex") && target === root) target.setAttribute("tabindex", "-1");
+  requestAnimationFrame(() => target.focus({ preventScroll: true }));
+}
+function activateFocusTrap(root, preferred){
+  if (activeDialog === root) return;
+  lastFocusedBeforeDialog = document.activeElement;
+  activeDialog = root;
+  focusDialog(root, preferred);
+}
+function releaseFocusTrap(restore = true){
+  const restoreTo = lastFocusedBeforeDialog;
+  activeDialog = null;
+  lastFocusedBeforeDialog = null;
+  if (restore && restoreTo && typeof restoreTo.focus === "function") {
+    requestAnimationFrame(() => {
+      try { restoreTo.focus({ preventScroll: true }); } catch (_) {}
+    });
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (!activeDialog || e.key !== "Tab") return;
+  const nodes = visibleFocusable(activeDialog);
+  if (nodes.length === 0) {
+    e.preventDefault();
+    focusDialog(activeDialog);
+    return;
+  }
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+});
+function setBodySiblingsInert(dialog, inert){
+  Array.from(document.body.children).forEach((child) => {
+    if (child === dialog || child.contains(dialog) || child.tagName === "SCRIPT") return;
+    if (inert) {
+      child.setAttribute("inert", "");
+      child.setAttribute("aria-hidden", "true");
+    } else {
+      child.removeAttribute("inert");
+      child.removeAttribute("aria-hidden");
+    }
+  });
+}
 
 /* ---------- frame sequence ---------- */
 const frames = new Array(FRAME_COUNT);
@@ -166,6 +238,7 @@ const setPanelX = panel    ? gsap.quickSetter(panel, "x", "px")    : null;
 const setPanelO = panel    ? gsap.quickSetter(panel, "opacity")    : null;
 const setBodyX  = act2Body ? gsap.quickSetter(act2Body, "x", "px") : null;
 const setBodyO  = act2Body ? gsap.quickSetter(act2Body, "opacity") : null;
+let resumeTrapOpen = false;
 
 function render(){
   if (!panel) return;
@@ -185,10 +258,17 @@ function render(){
 function applyState(){
   if (!drawer) return;
   const open = panelProgress > 0.001;
+  const trapOpen = panelProgress > 0.5;
   if (panel) panel.style.pointerEvents = open ? "auto" : "none";
   drawer.setAttribute("aria-hidden", open ? "false" : "true");
+  drawer.setAttribute("aria-modal", trapOpen ? "true" : "false");
   if (expCue) expCue.setAttribute("aria-expanded", open ? "true" : "false");
   document.body.classList.toggle("resume-open", open);  // fade the nav out of the way
+  if (trapOpen !== resumeTrapOpen) {
+    resumeTrapOpen = trapOpen;
+    if (trapOpen) activateFocusTrap(drawer, rdClose);
+    else if (activeDialog === drawer) releaseFocusTrap(false);
+  }
 
   // reflect a shareable #resume hash once the panel is effectively open.
   // Only clear a hash we set ourselves, so a deep-linked #resume survives the
@@ -503,9 +583,7 @@ if (pfGrid){
     filter === "experimental" ? card.dataset.experimental === "true" :
     card.dataset.context === filter;
 
-  // NOTE: not named `render` — scroll.js is a classic (non-module) script, so a
-  // block-scoped `function render` would hoist over the résumé panel's global
-  // render() and break the drawer.
+  // NOTE: keep this distinct from the résumé panel's render() for readability.
   function pfRender(){
     const shown = cards.filter(matches);
     const pageCount = Math.max(1, Math.ceil(shown.length / SIZE));
@@ -568,22 +646,31 @@ if (pfModal){
   function pfOpen(slug){
     const panel = pfModal.querySelector('.pf-modal-panel[data-project="' + slug + '"]');
     if (!panel) return;
+    pfLastFocused = document.activeElement;
     pfPanels.forEach(p => p.classList.toggle("is-active", p === panel));
     pfModal.classList.add("is-open");
+    pfModal.setAttribute("aria-hidden", "false");
+    const title = panel.querySelector(".pf-modal-title");
+    if (title && title.id) pfModal.setAttribute("aria-labelledby", title.id);
+    setBodySiblingsInert(pfModal, true);
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";          // lock background scroll
     panel.querySelector(".pf-modal-inner").scrollTop = 0;
     if (!reduce) panel.querySelectorAll("video").forEach(v => { v.play().catch(() => {}); }); // muted autoplay
     const closeBtn = panel.querySelector(".pf-modal-close");
-    if (closeBtn) closeBtn.focus();
+    activateFocusTrap(pfModal, closeBtn);
   }
   function pfClose(){
     if (!pfModal.classList.contains("is-open")) return;
     pfModal.classList.remove("is-open");
+    pfModal.setAttribute("aria-hidden", "true");
+    pfModal.removeAttribute("aria-labelledby");
     pfModal.querySelectorAll("video").forEach(v => { v.pause(); });  // stop playback when hidden
+    setBodySiblingsInert(pfModal, false);
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
-    if (pfLastFocused){ try { pfLastFocused.focus(); } catch (_) {} }
+    releaseFocusTrap(false);
+    if (pfLastFocused){ try { pfLastFocused.focus({ preventScroll: true }); } catch (_) {} }
   }
 
   $$(".pf-card").forEach(card => {

@@ -36,6 +36,7 @@ type UIStrings = {
     label: string;
     placeholder: string;
     noResults: string;
+    error: string;
   };
 };
 
@@ -75,6 +76,7 @@ export const ui: Record<Locale, UIStrings> = {
       label: 'Search articles',
       placeholder: 'Search posts, tags…',
       noResults: 'No posts match',
+      error: 'Search is temporarily unavailable.',
     },
   },
   it: {
@@ -112,6 +114,7 @@ export const ui: Record<Locale, UIStrings> = {
       label: 'Cerca tra gli articoli',
       placeholder: 'Cerca articoli, tag…',
       noResults: 'Nessun articolo corrisponde a',
+      error: 'La ricerca non è temporaneamente disponibile.',
     },
   },
 };

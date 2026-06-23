@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 
 import { readingTimeRemarkPlugin } from './src/utils/frontmatter.ts';
@@ -28,6 +29,6 @@ export default defineConfig({
     },
   },
   markdown: {
-    remarkPlugins: [readingTimeRemarkPlugin],
+    processor: unified({ remarkPlugins: [readingTimeRemarkPlugin] }),
   },
 });

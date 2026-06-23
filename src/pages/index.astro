@@ -6,12 +6,74 @@ import NowPlaying from '~/components/NowPlaying.astro';
 import ToTop from '~/components/ToTop.astro';
 import { frontmatter as resume } from '~/data/resume.md';
 import { frontmatter as portfolio } from '~/data/portfolio.md';
-const pfProjects = portfolio.projects ?? [];
+
+type ProjectContext = 'employed' | 'freelance' | 'indie';
+interface TextLink {
+  label: string;
+  href: string;
+}
+interface ResumeJob {
+  role: string;
+  period: string;
+  org: string;
+  note?: string;
+  notes?: string[];
+}
+interface ResumeMetaRow {
+  label: string;
+  value: string;
+  note?: string;
+  led?: boolean;
+}
+interface ResumeSkillGroup {
+  category: string;
+  items?: string[];
+}
+interface ResumeData {
+  name: string;
+  role: string;
+  summary: string;
+  jobs?: ResumeJob[];
+  meta?: ResumeMetaRow[];
+  skills?: ResumeSkillGroup[];
+  metaAfter?: ResumeMetaRow[];
+  portfolio?: TextLink[];
+}
+interface PortfolioSpec {
+  label: string;
+  value: string;
+}
+type PortfolioVideo = string | { src: string; poster?: string };
+interface PortfolioProject {
+  slug: string;
+  context: ProjectContext;
+  experimental?: boolean;
+  platform: string;
+  title: string;
+  date?: string;
+  summary: string;
+  description?: string;
+  specs?: PortfolioSpec[];
+  images?: string[];
+  videos?: PortfolioVideo[];
+  links?: TextLink[];
+}
+interface PortfolioData {
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  projects?: PortfolioProject[];
+}
+type NoteSegment = { text: string; project?: string };
+
+const resumeData = resume as ResumeData;
+const portfolioData = portfolio as PortfolioData;
+const pfProjects = portfolioData.projects ?? [];
 const PF_PAGE_SIZE = 6;                                       // Selected Work: projects per page
 
 // Filter pills are derived from the projects' `context` + `experimental` fields.
-const PF_CONTEXT_ORDER = ['employed', 'freelance', 'indie'];
-const PF_CONTEXT_LABELS = { employed: 'Employed', freelance: 'Freelance', indie: 'Indie' };
+const PF_CONTEXT_ORDER = ['employed', 'freelance', 'indie'] as const;
+const PF_CONTEXT_LABELS: Record<ProjectContext, string> = { employed: 'Employed', freelance: 'Freelance', indie: 'Indie' };
 const pfContexts = PF_CONTEXT_ORDER.filter((c) => pfProjects.some((p) => p.context === c));
 const pfHasExperimental = pfProjects.some((p) => p.experimental);
 const pfHasFilters = pfContexts.length > 1 || pfHasExperimental;
@@ -20,10 +82,11 @@ const pfHasFilters = pfContexts.length > 1 || pfHasExperimental;
 // Syntax in resume.md:  [Eolo](project:eolo)  →  links the word "Eolo" to the
 // portfolio project whose slug is "eolo" (opens its detail HUD on click).
 const pfSlugs = new Set(pfProjects.map((p) => p.slug));
-function parseNote(text) {
-  const segments = [];
+function parseNote(text: string): NoteSegment[] {
+  const segments: NoteSegment[] = [];
   const re = /\[([^\]]+)\]\(project:([^)]+)\)/g;
-  let last = 0, m;
+  let last = 0;
+  let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) segments.push({ text: text.slice(last, m.index) });
     segments.push({ text: m[1], project: m[2] });
@@ -32,9 +95,18 @@ function parseNote(text) {
   if (last < text.length) segments.push({ text: text.slice(last) });
   return segments;
 }
+
+function hasItems<T>(items: T[] | undefined): items is T[] {
+  return Array.isArray(items) && items.length > 0;
+}
 ---
 
-<BaseLayout title="MONOIDX — Sequence" bodyClass="scroll-edition">
+<BaseLayout
+  title="MONOIDX — Sequence"
+  description="MONOIDX is Vincenzo S.'s Apple platform engineering identity: iOS, SwiftUI, architecture, AI-assisted development, and selected shipped work."
+  ogImage="/assets/hero.jpg"
+  bodyClass="scroll-edition"
+>
   <link slot="head" rel="stylesheet" href="/scroll.css" />
 
   <!-- loading veil -->
@@ -53,7 +125,7 @@ function parseNote(text) {
 
   <!-- nav -->
   <nav class="nav" id="nav">
-    <div class="brand" id="brandHome" role="button" tabindex="0" aria-label="Back to top">MONOIDX</div>
+    <button class="brand" id="brandHome" type="button" aria-label="MONOIDX, back to top">MONOIDX</button>
     <div class="nav-cluster">
       <div class="nav-cluster-row">
         <div class="nav-links" id="landing-nav-menu" data-nav-menu>
@@ -173,7 +245,7 @@ function parseNote(text) {
 
       </div>
 
-      <!-- centered "Professional Experience" resume HUD panel (driven by scroll.js) -->
+      <!-- centered "Professional Experience" resume HUD panel (driven by the scroll module) -->
       <aside class="resume-drawer" id="resumeDrawer" role="dialog" aria-label="Professional Experience" aria-hidden="true">
         <div class="rd-panel" id="rdPanel">
           <span class="br tl"></span><span class="br tr"></span>
@@ -185,20 +257,20 @@ function parseNote(text) {
             </div>
 
             <div class="rd-id">
-              <h3>{resume.name}</h3>
-              <div class="rd-role">{resume.role}</div>
-              <p class="rd-sum">{resume.summary}</p>
+              <h3 id="resume-title">{resumeData.name}</h3>
+              <div class="rd-role">{resumeData.role}</div>
+              <p class="rd-sum">{resumeData.summary}</p>
             </div>
 
             <div class="rd-exp">
-              {resume.jobs?.map((job) => (
+              {resumeData.jobs?.map((job) => (
                 <div class="rd-job">
                   <div class="rd-job-h">
                     <span class="rd-job-role">{job.role}</span>
                     <span class="rd-job-when">{job.period}</span>
                   </div>
                   <div class="rd-job-org">{job.org}</div>
-                  {job.notes?.length > 0 ? (
+                  {hasItems(job.notes) ? (
                     <ul class="rd-job-notes">
                       {job.notes.map((n) => (
                         <li>{parseNote(n).map((s) => (
@@ -222,7 +294,7 @@ function parseNote(text) {
             </div>
 
             <div class="rd-meta">
-              {resume.meta?.map((row) => (
+              {resumeData.meta?.map((row) => (
                 <div class="rd-mrow">
                   <span class="k">{row.label}</span>
                   <div class="rd-mval">
@@ -231,11 +303,11 @@ function parseNote(text) {
                   </div>
                 </div>
               ))}
-              {resume.skills?.length > 0 && (
+              {hasItems(resumeData.skills) && (
                 <div class="rd-mrow">
                   <span class="k">Core Skills</span>
                   <div class="rd-skill-groups">
-                    {resume.skills.map((group) => (
+                    {resumeData.skills.map((group) => (
                       <div class="rd-skill-group">
                         <span class="rd-skill-cat">{group.category}</span>
                         <span class="rd-skill-items">{group.items?.join(' · ')}</span>
@@ -244,7 +316,7 @@ function parseNote(text) {
                   </div>
                 </div>
               )}
-              {resume.metaAfter?.map((row) => (
+              {resumeData.metaAfter?.map((row) => (
                 <div class="rd-mrow">
                   <span class="k">{row.label}</span>
                   <div class="rd-mval">
@@ -255,9 +327,9 @@ function parseNote(text) {
               ))}
             </div>
 
-            {resume.portfolio?.length > 0 && (
+            {hasItems(resumeData.portfolio) && (
               <div class="rd-portfolio">
-                {resume.portfolio.map((link) => (
+                {resumeData.portfolio.map((link) => (
                   <a class="rd-portfolio-link" href={link.href}><span>{link.label}</span><span class="ar">↗</span></a>
                 ))}
               </div>
@@ -274,9 +346,9 @@ function parseNote(text) {
   <section class="portfolio" id="portfolio" data-screen-label="Portfolio">
     <div class="portfolio-bg" data-depth="0.4"><span>WORK</span></div>
     <div class="wrap pf-wrap">
-      <span class="eyebrow anim-up">{portfolio.eyebrow ?? 'Section 05 — Portfolio'}</span>
-      <h2 class="pf-title anim-up">{portfolio.title ?? 'Selected Work'}</h2>
-      {portfolio.intro && <p class="pf-lede anim-up">{portfolio.intro}</p>}
+      <span class="eyebrow anim-up">{portfolioData.eyebrow ?? 'Section 05 — Portfolio'}</span>
+      <h2 class="pf-title anim-up">{portfolioData.title ?? 'Selected Work'}</h2>
+      {portfolioData.intro && <p class="pf-lede anim-up">{portfolioData.intro}</p>}
 
       {pfHasFilters && (
         <div class="pf-filter anim-up" id="pfFilter" role="group" aria-label="Filter projects by type">
@@ -304,7 +376,7 @@ function parseNote(text) {
             <span class="pf-n">{String(i + 1).padStart(2, '0')}</span>
             <div class="pf-card-body">
               <span class="pf-tag">{p.platform}</span>
-              <h3 class="pf-name">{p.title}</h3>
+              <span class="pf-name">{p.title}</span>
               <p class="pf-desc">{p.summary}</p>
             </div>
             <span class="ar">↗</span>
@@ -321,7 +393,7 @@ function parseNote(text) {
   </section>
 
   <!-- ===================== PORTFOLIO PROJECT HUD (fade in/out) ===================== -->
-  <div class="pf-modal" id="pfModal" role="dialog" aria-modal="true" aria-label="Project details">
+  <div class="pf-modal" id="pfModal" role="dialog" aria-modal="true" aria-label="Project details" aria-hidden="true">
     {pfProjects.map((p) => (
       <div class="pf-modal-panel" data-project={p.slug}>
         <span class="br tl"></span><span class="br tr"></span>
@@ -330,12 +402,12 @@ function parseNote(text) {
         <div class="pf-modal-inner">
           <div class="eyebrow no-rule pf-modal-eyebrow">{p.platform}</div>
           <div class="pf-modal-head">
-            <h3 class="pf-modal-title">{p.title}</h3>
+            <h3 class="pf-modal-title" id={`project-title-${p.slug}`}>{p.title}</h3>
             {p.date && <span class="pf-modal-date">{p.date}</span>}
           </div>
           {p.description && <p class="pf-modal-desc">{p.description}</p>}
 
-          {p.specs?.length > 0 && (
+          {hasItems(p.specs) && (
             <div class="pf-specs">
               {p.specs.map((s) => (
                 <div class="pf-spec-row"><span class="k">{s.label}</span><span class="v">{s.value}</span></div>
@@ -343,7 +415,7 @@ function parseNote(text) {
             </div>
           )}
 
-          {(p.images?.length > 0 || p.videos?.length > 0) && (
+          {(hasItems(p.images) || hasItems(p.videos)) && (
             <div class="pf-gallery">
               {p.images?.map((src) => (
                 <img src={src} alt={`${p.title} — preview`} loading="lazy" />
@@ -360,7 +432,7 @@ function parseNote(text) {
             </div>
           )}
 
-          {p.links?.length > 0 && (
+          {hasItems(p.links) && (
             <div class="pf-modal-links">
               {p.links.map((link) => (
                 <a class="rd-portfolio-link" href={link.href} target="_blank" rel="noopener noreferrer"><span>{link.label}</span><span class="ar">↗</span></a>
@@ -410,7 +482,5 @@ function parseNote(text) {
     } catch (e) {}
   </script>
 
-  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script is:inline src="/scroll.js"></script>
+  <script src="../scripts/scroll.ts"></script>
 </BaseLayout>

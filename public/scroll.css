@@ -299,8 +299,8 @@ body.resume-open .nav{opacity:0;pointer-events:none}
   padding-block:clamp(48px,7vw,90px)}
 .footer2 .fg{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 .footer2 .fw{font-family:var(--display);font-weight:500;letter-spacing:.3em;font-size:clamp(28px,5vw,56px);color:#fff;line-height:1}
-.footer2 .ftag{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--txt-3);margin-top:14px}
-.footer2 .fmeta{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-4);text-align:right;line-height:2}
+.footer2 .ftag{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--txt-2);margin-top:14px}
+.footer2 .fmeta{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8a8a8c;text-align:right;line-height:2}
 
 /* ===================== PORTFOLIO (placeholder, post-pin) ===================== */
 .portfolio{position:relative;z-index:2;background:linear-gradient(180deg,#0b0b0b,#050505);overflow:hidden}
@@ -316,10 +316,10 @@ body.resume-open .nav{opacity:0;pointer-events:none}
 .pf-card{position:relative;display:flex;gap:22px;align-items:flex-start;
   background:#050505;padding:clamp(28px,3vw,40px);text-decoration:none;transition:background .5s var(--ease)}
 .pf-card:hover{background:var(--graphite)}
-.pf-n{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--txt-3);padding-top:6px}
+.pf-n{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--txt-2);padding-top:6px}
 .pf-card-body{flex:1}
 .pf-tag{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver)}
-.pf-name{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.4vw,30px);color:#fff;letter-spacing:-.01em;margin-top:10px}
+.pf-name{display:block;font-family:var(--display);font-weight:400;font-size:clamp(22px,2.4vw,30px);color:#fff;letter-spacing:-.01em;margin-top:10px}
 .pf-desc{font-size:14px;font-weight:300;line-height:1.55;color:var(--txt-2);margin-top:10px;max-width:42ch}
 .pf-card .ar{color:var(--txt-3);font-size:16px;transition:transform .4s var(--ease),color .4s var(--ease)}
 .pf-card:hover .ar{color:var(--silver);transform:translate(4px,-4px)}
@@ -436,10 +436,10 @@ body.resume-open .nav{opacity:0;pointer-events:none}
     background:rgba(5,5,5,.985);
     -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
     border-bottom:1px solid var(--line);
-    transform:translateY(-8px);opacity:0;pointer-events:none;
-    transition:opacity .35s var(--ease),transform .35s var(--ease);
+    transform:translateY(-8px);opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .35s var(--ease),transform .35s var(--ease),visibility 0s linear .35s;
   }
-  .scroll-edition .nav-links.is-open{opacity:1;transform:none;pointer-events:auto}
+  .scroll-edition .nav-links.is-open{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .35s var(--ease),transform .35s var(--ease)}
   .scroll-edition .nav-links a{
     font-size:12px;letter-spacing:.18em;padding:15px 2px;
     border-top:1px solid var(--line);

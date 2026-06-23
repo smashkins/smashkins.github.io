@@ -16,6 +16,7 @@ const strings = t(locale);
   data-blog-search
   data-index-url={indexUrl}
   data-no-results={strings.search.noResults}
+  data-error={strings.search.error}
 >
   <label class="blog-search__label" for="blog-search-input">{strings.search.label}</label>
   <div class="blog-search__field">
@@ -70,7 +71,12 @@ const strings = t(locale);
   function loadIndex(url: string): Promise<SearchRecord[]> {
     let pending = indexCache.get(url);
     if (!pending) {
-      pending = fetch(url).then((res) => res.json() as Promise<SearchRecord[]>);
+      pending = fetch(url).then((res) => {
+        if (!res.ok) {
+          throw new Error(`Search index request failed: ${res.status}`);
+        }
+        return res.json() as Promise<SearchRecord[]>;
+      });
       indexCache.set(url, pending);
     }
     return pending;
@@ -124,7 +130,9 @@ const strings = t(locale);
     const status = root.querySelector<HTMLElement>('[data-search-status]');
     const indexUrl = root.dataset.indexUrl;
     const noResultsText = root.dataset.noResults ?? 'No posts match';
+    const errorText = root.dataset.error ?? 'Search is temporarily unavailable.';
     if (!input || !results || !status || !indexUrl) return;
+    const resolvedIndexUrl = indexUrl;
 
     // The paginated list + pagination that search temporarily replaces.
     const defaultList = document.querySelector<HTMLElement>(
@@ -135,7 +143,7 @@ const strings = t(locale);
     let fuse: Fuse<SearchRecord> | null = null;
     async function ensureFuse(): Promise<Fuse<SearchRecord>> {
       if (!fuse) {
-        const records = await loadIndex(indexUrl!);
+        const records = await loadIndex(resolvedIndexUrl);
         fuse = new Fuse(records, {
           threshold: 0.4,
           ignoreLocation: true,
@@ -163,7 +171,19 @@ const strings = t(locale);
         showDefault();
         return;
       }
-      const hits = (await ensureFuse()).search(q).map((r) => r.item);
+      let hits: SearchRecord[];
+      try {
+        hits = (await ensureFuse()).search(q).map((r) => r.item);
+      } catch (error) {
+        console.error(error);
+        results!.hidden = true;
+        results!.innerHTML = '';
+        status!.textContent = errorText;
+        status!.hidden = false;
+        if (defaultList) defaultList.hidden = false;
+        if (pagination) pagination.hidden = false;
+        return;
+      }
       if (defaultList) defaultList.hidden = true;
       if (pagination) pagination.hidden = true;
 

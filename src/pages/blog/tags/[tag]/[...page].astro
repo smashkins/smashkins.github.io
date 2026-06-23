@@ -7,6 +7,7 @@ import { getPosts, tagSlug, type BlogEntry } from '~/utils/blog';
 import { t, type Locale } from '~/i18n';
 
 const LOCALE: Locale = 'en';
+const OTHER: Locale = 'it';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPosts('en');
@@ -31,6 +32,12 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page, tagLabel } = Astro.props as { page: Page<BlogEntry>; tagLabel: string };
 const strings = t(LOCALE);
+const tag = Astro.params.tag ?? tagSlug(tagLabel);
+const otherTagExists = (await getPosts(OTHER)).some((post) =>
+  post.data.tags.some((postTag) => tagSlug(postTag) === tag)
+);
+const enHref = new URL(Astro.url.pathname, Astro.site).href;
+const itHref = new URL(`/it/blog/tags/${tag}/`, Astro.site).href;
 ---
 
 <BlogLayout
@@ -38,6 +45,12 @@ const strings = t(LOCALE);
   description={`${strings.blog.taggedWith} ${tagLabel}`}
   locale={LOCALE}
 >
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={enHref} />
+    {otherTagExists && <link rel="alternate" hreflang="it" href={itHref} />}
+    <link rel="alternate" hreflang="x-default" href={enHref} />
+  </Fragment>
+
   <header class="blog-header">
     <p class="eyebrow">{strings.blog.eyebrow}</p>
     <h1 class="blog-header__title">{strings.blog.taggedWith} {tagLabel}</h1>

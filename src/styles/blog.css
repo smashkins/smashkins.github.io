@@ -54,7 +54,7 @@
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--txt-3);
+  color: var(--txt-2);
   transition: color 0.35s var(--ease);
   position: relative;
 }
@@ -83,7 +83,7 @@
   letter-spacing: 0.18em;
 }
 .blog-nav__switch a {
-  color: var(--txt-3);
+  color: var(--txt-2);
   transition: color 0.35s var(--ease);
 }
 .blog-nav__switch a:hover {
@@ -93,7 +93,7 @@
   color: var(--txt-1);
 }
 .blog-nav__sep {
-  color: var(--txt-4);
+  color: #8a8a8c;
 }
 
 /* ---------- main wrapper ---------- */
@@ -163,7 +163,7 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--txt-3);
+  color: var(--txt-2);
   border: 1px solid var(--line-2);
   padding: 6px 12px;
   border-radius: 0;
@@ -184,7 +184,7 @@
   font-size: 10.5px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--txt-3);
+  color: var(--txt-2);
   margin-bottom: 14px;
 }
 .blog-search__field {
@@ -870,7 +870,7 @@ a.post-nav__row--next:hover .post-nav__arrow {
   font-size: 11px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--txt-3);
+  color: var(--txt-2);
   margin-top: 14px;
 }
 .blog-footer__meta {
@@ -878,7 +878,7 @@ a.post-nav__row--next:hover .post-nav__arrow {
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--txt-4);
+  color: #8a8a8c;
   text-align: right;
   line-height: 2;
 }
@@ -989,13 +989,21 @@ a.post-nav__row--next:hover .post-nav__arrow {
     border-bottom: 1px solid var(--line);
     transform: translateY(-8px);
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+    transition:
+      opacity 0.35s var(--ease),
+      transform 0.35s var(--ease),
+      visibility 0s linear 0.35s;
   }
   .blog-nav__links.is-open {
     opacity: 1;
+    visibility: visible;
     transform: none;
     pointer-events: auto;
+    transition:
+      opacity 0.35s var(--ease),
+      transform 0.35s var(--ease);
   }
   .blog-nav__links > a,
   .blog-nav__switch {

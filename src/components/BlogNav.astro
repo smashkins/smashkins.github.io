@@ -47,6 +47,8 @@ const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
 <script>
   // Remember the language the visitor is reading the blog in, so the (shared,
   // English) landing can send them back to the right locale via its Blog link.
+  const w = window as unknown as { __blogNavLangBound?: boolean };
+
   function recordLang() {
     const nav = document.querySelector('.blog-nav[data-locale]');
     if (!nav) return;
@@ -57,5 +59,8 @@ const itPath = switchIt ?? switchLocalePath(Astro.url.pathname, 'it');
     }
   }
   recordLang();
-  document.addEventListener('astro:page-load', recordLang);
+  if (!w.__blogNavLangBound) {
+    w.__blogNavLangBound = true;
+    document.addEventListener('astro:page-load', recordLang);
+  }
 </script>

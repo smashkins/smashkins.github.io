@@ -18,6 +18,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const absoluteOgImage = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 ---
 
 <!DOCTYPE html>
@@ -28,6 +29,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" type="application/rss+xml" title="MONOIDX Articles" href={new URL('/rss.xml', Astro.site).href} />
+    <link rel="alternate" type="application/rss+xml" title="MONOIDX Articoli" href={new URL('/it/rss.xml', Astro.site).href} />
 
     <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -42,7 +45,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:url" content={canonicalURL} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:site_name" content="MONOIDX" />
+    {absoluteOgImage && <meta property="og:image" content={absoluteOgImage} />}
+    <meta name="twitter:card" content={absoluteOgImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    {absoluteOgImage && <meta name="twitter:image" content={absoluteOgImage} />}
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
