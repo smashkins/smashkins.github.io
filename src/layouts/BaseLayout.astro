@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+
 export interface Props {
   title: string;
   description?: string;
@@ -60,6 +62,7 @@ const absoluteOgImage = ogImage ? new URL(ogImage, Astro.site).href : undefined;
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
+    <ClientRouter />
 
     <slot name="head" />
   </head>

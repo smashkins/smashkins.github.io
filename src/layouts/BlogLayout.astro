@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from 'astro:transitions';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import BlogNav from '~/components/BlogNav.astro';
 import { type Locale } from '~/i18n';
@@ -28,7 +27,6 @@ const lang = locale === 'it' ? 'it' : 'en';
   bodyClass="blog-edition"
 >
   <Fragment slot="head">
-    <ClientRouter />
     <slot name="head" />
   </Fragment>
 
