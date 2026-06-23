@@ -543,20 +543,53 @@
   padding: 0.12em 0.4em;
 }
 .post-body pre {
-  background: var(--charcoal);
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 0;
-  padding: 20px;
-  overflow-x: auto;
+  /* background-color is set inline by Shiki (Rosé Pine base) */
+  overflow: hidden;
   font-size: 13.5px;
   line-height: 1.6;
 }
+/* language label header, fed by Shiki's data-language attribute */
+.post-body pre[data-language]::before {
+  content: attr(data-language);
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #908caa;
+  padding: 11px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.post-body pre[data-language='plaintext']::before,
+.post-body pre[data-language='text']::before,
+.post-body pre[data-language='ansi']::before {
+  content: none;
+}
 .post-body pre code {
+  display: block;
+  padding: 20px;
   background: none;
   border: 0;
-  padding: 0;
   font-size: inherit;
   color: inherit;
+  /* collapse the literal newlines between .line spans so block lines
+     don't produce double spacing — wrapping is handled per line below */
+  white-space: normal;
+}
+/* soft-wrap long lines with a hanging indent: first line flush,
+   wrapped continuation lines indented so they read as one logical line */
+.post-body pre code .line {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+/* keep the height of intentional blank lines in the snippet */
+.post-body pre code .line:empty::before {
+  content: '\00a0';
 }
 .post-body hr {
   border: 0;

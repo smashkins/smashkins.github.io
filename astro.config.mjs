@@ -30,5 +30,9 @@ export default defineConfig({
   },
   markdown: {
     processor: unified({ remarkPlugins: [readingTimeRemarkPlugin] }),
+    shikiConfig: {
+      theme: 'rose-pine',
+      wrap: true,
+    },
   },
 });
