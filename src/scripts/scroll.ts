@@ -7,6 +7,52 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
 
+const landingWindow = window as typeof window & {
+  __mxLandingCleanup?: () => void;
+  __mxSmoothScrollTo?: (y: number) => void;
+};
+
+function initLanding() {
+  if (!document.getElementById("seqCanvas")) {
+    landingWindow.__mxLandingCleanup?.();
+    return;
+  }
+
+  landingWindow.__mxLandingCleanup?.();
+
+  const cleanupTasks: Array<() => void> = [];
+  let cleanedUp = false;
+
+  function addCleanup(task: () => void) {
+    cleanupTasks.push(task);
+  }
+
+  function on(
+    target: EventTarget,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: AddEventListenerOptions | boolean,
+  ) {
+    target.addEventListener(type, listener, options);
+    addCleanup(() => target.removeEventListener(type, listener, options));
+  }
+
+  function cleanupLanding() {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    cleanupTasks.splice(0).reverse().forEach((task) => task());
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    gsap.globalTimeline.clear();
+    document.body.classList.remove("resume-open");
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    if (landingWindow.__mxSmoothScrollTo === smoothScrollTo) delete landingWindow.__mxSmoothScrollTo;
+    if (landingWindow.__mxLandingCleanup === cleanupLanding) delete landingWindow.__mxLandingCleanup;
+  }
+
+  landingWindow.__mxLandingCleanup = cleanupLanding;
+  on(document, "astro:before-swap", cleanupLanding, { once: true });
+
 const LABELS = ["Unit", "Identity", "Expertise", "Philosophy", "Operational"];
 const BOUNDS = [0.15, 0.37, 0.59, 0.81];   // progress thresholds → active section
 const FRAME_COUNT = 60;                     // assets/frames/f00.jpg … f59.jpg
@@ -67,7 +113,7 @@ function releaseFocusTrap(restore = true){
     });
   }
 }
-document.addEventListener("keydown", (e) => {
+on(document, "keydown", (e) => {
   if (!activeDialog || e.key !== "Tab") return;
   const nodes = visibleFocusable(activeDialog);
   if (nodes.length === 0) {
@@ -371,7 +417,7 @@ function smoothScrollTo(y){
 }
 // Exposed so shared components (e.g. ToTop) can scroll reliably on this page
 // instead of native smooth scroll, which ScrollTrigger pinning cancels.
-window.__mxSmoothScrollTo = smoothScrollTo;
+landingWindow.__mxSmoothScrollTo = smoothScrollTo;
 
 /* ============ clickable rail — jump to each section ============ */
 const stMain = tl.scrollTrigger;
@@ -407,13 +453,13 @@ if (ghost) ghost.textContent = "MX";
 
 /* nav scrolled state */
 const nav = $("#nav");
-window.addEventListener("scroll", () => {
-  nav.classList.toggle("scrolled", window.scrollY > 40);
+on(window, "scroll", () => {
+  nav?.classList.toggle("scrolled", window.scrollY > 40);
 }, { passive: true });
 
 /* keep canvas crisp + layout correct on resize / orientation change */
 let rT = null;
-window.addEventListener("resize", () => {
+on(window, "resize", () => {
   clearTimeout(rT);
   rT = setTimeout(() => {
     sizeCanvas();
@@ -423,7 +469,7 @@ window.addEventListener("resize", () => {
   }, 150);
 }, { passive: true });
 
-window.addEventListener("load", () => ScrollTrigger.refresh());
+on(window, "load", () => ScrollTrigger.refresh());
 
 /* ============ professional experience drawer — gesture listeners ============ */
 if (drawer){
@@ -438,7 +484,7 @@ if (drawer){
     return d;                                       // pixels
   }
   let wheelSettle = null;
-  window.addEventListener("wheel", (e) => {
+  on(window, "wheel", (e) => {
     if (reduce) return;
     if (document.querySelector(".pf-modal.is-open")) return;  // project modal scrolls natively
     const open = panelProgress > 0 || snapTween;
@@ -466,13 +512,13 @@ if (drawer){
 
   /* ---- touch ---- */
   let tx = 0, ty = 0, tAxis = null, tBase = 0;
-  window.addEventListener("touchstart", (e) => {
+  on(window, "touchstart", (e) => {
     if (reduce) return;
     if (currentIdx !== EXP_IDX && panelProgress === 0) return;
     const t = e.touches[0]; tx = t.clientX; ty = t.clientY; tAxis = null; tBase = acc;
     if (snapTween){ snapTween.kill(); snapTween = null; }
   }, { passive: true });
-  window.addEventListener("touchmove", (e) => {
+  on(window, "touchmove", (e) => {
     if (reduce) return;
     if (document.querySelector(".pf-modal.is-open")) return;  // project modal scrolls natively
     if (currentIdx !== EXP_IDX && panelProgress === 0) return;
@@ -491,7 +537,7 @@ if (drawer){
     panelProgress = clamp01(acc / THRESHOLD);
     render(); applyState();
   }, { passive: false });
-  window.addEventListener("touchend", () => {
+  on(window, "touchend", () => {
     if (tAxis === "x") snapTo(panelProgress > 0.5 ? 1 : 0);
     tAxis = null;
   }, { passive: true });
@@ -499,7 +545,7 @@ if (drawer){
   /* ---- click / keyboard fallback ---- */
   if (expCue)  expCue.addEventListener("click", () => snapTo(1));
   if (rdClose) rdClose.addEventListener("click", () => snapTo(0));
-  window.addEventListener("keydown", (e) => {
+  on(window, "keydown", (e) => {
     if (e.key === "Escape" && panelProgress > 0) snapTo(0);
   });
 
@@ -682,7 +728,7 @@ if (pfModal){
   });
   pfModal.querySelectorAll(".pf-modal-close").forEach(b => b.addEventListener("click", pfClose));
   pfModal.addEventListener("click", (e) => { if (e.target === pfModal) pfClose(); });  // backdrop
-  window.addEventListener("keydown", (e) => {
+  on(window, "keydown", (e) => {
     if (e.key === "Escape" && pfModal.classList.contains("is-open")) pfClose();
   });
 }
@@ -726,5 +772,13 @@ function openResumeDeepLink(){
 function maybeOpenResumeFromHash(){
   if (location.hash === "#resume") openResumeDeepLink();
 }
-window.addEventListener("load", () => { setTimeout(maybeOpenResumeFromHash, 200); });
-window.addEventListener("hashchange", maybeOpenResumeFromHash);
+on(window, "load", () => { setTimeout(maybeOpenResumeFromHash, 200); });
+on(window, "hashchange", maybeOpenResumeFromHash);
+}
+
+document.addEventListener("astro:page-load", initLanding);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initLanding, { once: true });
+} else {
+  initLanding();
+}
