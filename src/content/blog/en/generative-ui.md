@@ -8,7 +8,7 @@ tags:
   - Foundation Models
   - Apple Intelligence
   - ai
-image: /assets/blog/generative-ui/4164c4ec5f5c.png
+image: /assets/blog/generative-ui/f9dbf520dc80.png
 lang: en
 notionId: 384a9c08-e476-8066-abec-eaf15cdf087a
 ---
