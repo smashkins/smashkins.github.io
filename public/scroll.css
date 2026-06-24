@@ -300,6 +300,8 @@ body.resume-open .nav{opacity:0;pointer-events:none}
 .footer2 .fg{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 .footer2 .fw{font-family:var(--display);font-weight:500;letter-spacing:.3em;font-size:clamp(28px,5vw,56px);color:#fff;line-height:1}
 .footer2 .ftag{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--txt-2);margin-top:14px}
+.footer2 .ftag a{color:var(--txt-1);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;transition:opacity .2s var(--ease)}
+.footer2 .ftag a:hover{opacity:.6}
 .footer2 .fmeta{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8a8a8c;text-align:right;line-height:2}
 
 /* ===================== PORTFOLIO (placeholder, post-pin) ===================== */

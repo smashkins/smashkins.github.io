@@ -906,6 +906,16 @@ a.post-nav__row--next:hover .post-nav__arrow {
   color: var(--txt-2);
   margin-top: 14px;
 }
+.blog-footer__tag a {
+  color: var(--txt-1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: opacity 0.2s var(--ease);
+}
+.blog-footer__tag a:hover {
+  opacity: 0.6;
+}
 .blog-footer__meta {
   font-family: var(--mono);
   font-size: 10px;
