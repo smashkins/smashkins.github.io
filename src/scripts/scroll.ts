@@ -1,4 +1,3 @@
-// @ts-nocheck
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { queryAll as $$, queryOne as $ } from "./landing/dom";
@@ -17,7 +16,7 @@ const landingWindow = window as typeof window & {
   __mxSmoothScrollTo?: (y: number) => void;
 };
 
-function initLanding() {
+function initLanding(): void {
   if (!document.getElementById("seqCanvas")) {
     landingWindow.__mxLandingCleanup?.();
     return;
@@ -27,8 +26,9 @@ function initLanding() {
 
   const cleanupTasks: Array<() => void> = [];
   let cleanedUp = false;
+  let currentSmoothScrollTo: ((y: number) => void) | null = null;
 
-  function addCleanup(task: () => void) {
+  function addCleanup(task: () => void): void {
     cleanupTasks.push(task);
   }
 
@@ -37,12 +37,12 @@ function initLanding() {
     type: string,
     listener: EventListenerOrEventListenerObject,
     options?: AddEventListenerOptions | boolean,
-  ) {
+  ): void {
     target.addEventListener(type, listener, options);
     addCleanup(() => target.removeEventListener(type, listener, options));
   }
 
-  function cleanupLanding() {
+  function cleanupLanding(): void {
     if (cleanedUp) return;
     cleanedUp = true;
     cleanupTasks.splice(0).reverse().forEach((task) => task());
@@ -51,7 +51,7 @@ function initLanding() {
     document.body.classList.remove("resume-open");
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
-    if (landingWindow.__mxSmoothScrollTo === pageBehaviors.smoothScrollTo) delete landingWindow.__mxSmoothScrollTo;
+    if (currentSmoothScrollTo && landingWindow.__mxSmoothScrollTo === currentSmoothScrollTo) delete landingWindow.__mxSmoothScrollTo;
     if (landingWindow.__mxLandingCleanup === cleanupLanding) delete landingWindow.__mxLandingCleanup;
   }
 
@@ -62,53 +62,73 @@ const LABELS = ["Unit", "Identity", "Expertise", "Philosophy", "Operational"];
 const BOUNDS = [0.15, 0.37, 0.59, 0.81];   // progress thresholds → active section
 const FRAME_COUNT = 60;                     // assets/frames/f00.jpg … f59.jpg
 
-const veil      = $("#veil");
-const canvas    = $("#seqCanvas");
-const ctx       = canvas.getContext("2d");
-const videoWrap = $("#videoWrap");
-const railSegs  = $$("#rail .seg");
-const idxBig    = $("#idxBig");
-const idxLabel  = $("#idxLabel");
-const seqEl     = $("#seq");
-const angleEl   = $("#angle");
-const scrubFill = $("#scrubFill");
-const reticle   = $("#reticle");
-const ghost     = $("#ghost");
+const veil      = $<HTMLElement>("#veil");
+const canvas    = $<HTMLCanvasElement>("#seqCanvas");
+const ctx       = canvas?.getContext("2d") ?? null;
+const videoWrap = $<HTMLElement>("#videoWrap");
+const railSegs  = $$<HTMLElement>("#rail .seg");
+const idxBig    = $<HTMLElement>("#idxBig");
+const idxLabel  = $<HTMLElement>("#idxLabel");
+const seqEl     = $<HTMLElement>("#seq");
+const angleEl   = $<HTMLElement>("#angle");
+const scrubFill = $<HTMLElement>("#scrubFill");
+const reticle   = $<HTMLElement>("#reticle");
+const ghost     = $<HTMLElement>("#ghost");
+const scrimLeft = $<HTMLElement>("#scrimLeft");
 
-railSegs.forEach((seg, i) => { seg.querySelector("span").textContent = LABELS[i]; });
+if (!veil || !canvas || !ctx || !videoWrap || !idxBig || !idxLabel || !seqEl || !angleEl || !scrubFill || !reticle || !scrimLeft) {
+  return;
+}
+const veilEl = veil;
+const canvasEl = canvas;
+const ctx2d = ctx;
+const videoWrapEl = videoWrap;
+const idxBigEl = idxBig;
+const idxLabelEl = idxLabel;
+const seqTextEl = seqEl;
+const angleTextEl = angleEl;
+const scrubFillEl = scrubFill;
+const reticleEl = reticle;
+const scrimLeftEl = scrimLeft;
+
+railSegs.forEach((seg, i) => {
+  const label = LABELS[i];
+  const labelEl = seg.querySelector<HTMLElement>("span");
+  if (label && labelEl) labelEl.textContent = label;
+});
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const { activateFocusTrap, isActiveDialog, releaseFocusTrap } = createFocusTrap(on);
 
 /* ---------- frame sequence ---------- */
-const frames = new Array(FRAME_COUNT);
+const frames: Array<HTMLImageElement | undefined> = new Array(FRAME_COUNT);
 let curFrame = -1;
 let loaded = 0;
 
-function sizeCanvas(){
+function sizeCanvas(): void {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = videoWrap.clientWidth || window.innerWidth;
-  const h = videoWrap.clientHeight || window.innerHeight;
-  canvas.width  = Math.round(w * dpr);
-  canvas.height = Math.round(h * dpr);
-  canvas.style.width = w + "px";
-  canvas.style.height = h + "px";
+  const w = videoWrapEl.clientWidth || window.innerWidth;
+  const h = videoWrapEl.clientHeight || window.innerHeight;
+  canvasEl.width  = Math.round(w * dpr);
+  canvasEl.height = Math.round(h * dpr);
+  canvasEl.style.width = w + "px";
+  canvasEl.style.height = h + "px";
 }
 
-function drawFrame(i){
+function drawFrame(i: number): void {
   const img = frames[i];
   if (!img || !img.complete || !img.naturalWidth) return;
-  const cw = canvas.width, ch = canvas.height;
+  const cw = canvasEl.width, ch = canvasEl.height;
   const ir = img.naturalWidth / img.naturalHeight, cr = cw / ch;
-  let dw, dh;
+  let dw: number, dh: number;
   if (ir > cr){ dh = ch; dw = ch * ir; } else { dw = cw; dh = cw / ir; }
   const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
-  ctx.clearRect(0, 0, cw, ch);
-  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx2d.clearRect(0, 0, cw, ch);
+  ctx2d.drawImage(img, dx, dy, dw, dh);
   curFrame = i;
 }
 
-function preload(){
+function preload(): void {
   for (let i = 0; i < FRAME_COUNT; i++){
     const img = new Image();
     img.decoding = "async";
@@ -125,10 +145,10 @@ function preload(){
 }
 
 let revealed = false;
-function revealStage(){
+function revealStage(): void {
   if (revealed) return; revealed = true;
-  requestAnimationFrame(() => veil.classList.add("gone"));
-  setTimeout(() => { veil.style.display = "none"; }, 1000);
+  requestAnimationFrame(() => veilEl.classList.add("gone"));
+  setTimeout(() => { veilEl.style.display = "none"; }, 1000);
 }
 // hard fallback so the veil never sticks even if a frame stalls
 setTimeout(revealStage, 2500);
@@ -187,13 +207,14 @@ tl.to("#act4", IN, 84);
 tl.to("#manifest .mrow", { autoAlpha: 1, y: 0, duration: 5, stagger: 0.9, ease: "power2.out" }, 85.5);
 
 /* ============ STATE / HUD / PARALLAX ============ */
-const vlines = $$("#bgField .vline");
+const vlines = $$<HTMLElement>("#bgField .vline");
+const hudBrackets = $$<HTMLElement>("#hud .br");
 let lastIdx = -1;
 const TARGET_P = [0.05, 0.26, 0.48, 0.70, 0.93];
 const resumeDrawer = initResumeDrawer({
   $,
   $$,
-  gsap,
+  gsap: gsap as unknown as Parameters<typeof initResumeDrawer>[0]["gsap"],
   reduce,
   on,
   timeline: tl,
@@ -208,34 +229,35 @@ ScrollTrigger.create({
   start: "top top",
   end: "bottom bottom",
   scrub: true,
-  onUpdate(self){
+  onUpdate(self: ScrollTrigger){
     const p = self.progress;
-    scrubFill.style.width = (p * 100).toFixed(2) + "%";
+    scrubFillEl.style.width = (p * 100).toFixed(2) + "%";
 
     const ang = Math.round(p * 360) % 360;
-    angleEl.textContent = String(ang).padStart(3, "0") + "°";
+    angleTextEl.textContent = String(ang).padStart(3, "0") + "°";
 
     let idx = 0;
     for (let i = 0; i < BOUNDS.length; i++) if (p >= BOUNDS[i]) idx = i + 1;
     if (idx !== lastIdx){
       lastIdx = idx;
       railSegs.forEach((s, i) => s.classList.toggle("active", i === idx));
-      idxBig.textContent  = String(idx).padStart(2, "0");
-      idxLabel.textContent = LABELS[idx].toUpperCase();
-      seqEl.textContent = String(idx).padStart(2, "0") + " / 05";
+      const activeLabel = LABELS[idx] ?? "";
+      idxBigEl.textContent  = String(idx).padStart(2, "0");
+      idxLabelEl.textContent = activeLabel.toUpperCase();
+      seqTextEl.textContent = String(idx).padStart(2, "0") + " / 05";
       resumeDrawer.onSectionChange(idx);
       resumeDrawer.render();   // reposition the slider knob once it becomes visible
     }
-    $("#scrimLeft").style.opacity = idx >= 1 ? 1 : 0.35;
+    scrimLeftEl.style.opacity = idx >= 1 ? "1" : "0.35";
 
     // transforming graphics
-    reticle.style.transform = `translate(-50%,-50%) rotate(${(p * 220).toFixed(1)}deg) scale(${(0.8 + Math.sin(p * Math.PI) * 0.5).toFixed(3)})`;
-    reticle.style.opacity = (Math.sin(p * Math.PI) * 0.32).toFixed(3);
+    reticleEl.style.transform = `translate(-50%,-50%) rotate(${(p * 220).toFixed(1)}deg) scale(${(0.8 + Math.sin(p * Math.PI) * 0.5).toFixed(3)})`;
+    reticleEl.style.opacity = (Math.sin(p * Math.PI) * 0.32).toFixed(3);
     const bs = 40 + p * 34;
-    $$("#hud .br").forEach(b => { b.style.width = bs + "px"; b.style.height = bs + "px"; });
+    hudBrackets.forEach(b => { b.style.width = bs + "px"; b.style.height = bs + "px"; });
 
     // parallax
-    videoWrap.style.transform = `scale(${(1.1 - p * 0.1).toFixed(3)}) translateY(${(p * -3).toFixed(2)}%)`;
+    videoWrapEl.style.transform = `scale(${(1.1 - p * 0.1).toFixed(3)}) translateY(${(p * -3).toFixed(2)}%)`;
     vlines.forEach(v => {
       const d = parseFloat(v.dataset.depth || "0.2");
       v.style.transform = `translateY(${(p * d * -160).toFixed(1)}px)`;
@@ -260,13 +282,14 @@ const pageBehaviors = initPageBehaviors({
 });
 // Exposed so shared components (e.g. ToTop) can scroll reliably on this page
 // instead of native smooth scroll, which ScrollTrigger pinning cancels.
+currentSmoothScrollTo = pageBehaviors.smoothScrollTo;
 landingWindow.__mxSmoothScrollTo = pageBehaviors.smoothScrollTo;
 if (ghost) ghost.textContent = "MX";
 
 /* keep canvas crisp + layout correct on resize / orientation change */
-let rT = null;
+let rT: ReturnType<typeof setTimeout> | null = null;
 on(window, "resize", () => {
-  clearTimeout(rT);
+  if (rT !== null) clearTimeout(rT);
   rT = setTimeout(() => {
     sizeCanvas();
     drawFrame(Math.max(0, curFrame));
