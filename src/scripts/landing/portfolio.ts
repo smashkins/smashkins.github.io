@@ -1,4 +1,79 @@
-// @ts-nocheck
+type QueryOne = <T extends Element = Element>(selector: string) => T | null;
+type QueryAll = <T extends Element = Element>(selector: string) => T[];
+
+type ManagedEventListener = (
+  target: EventTarget,
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: AddEventListenerOptions | boolean,
+) => void;
+
+type GsapSetVars = {
+  autoAlpha?: number;
+  y?: number;
+};
+
+type GsapSet = {
+  set(target: Element | string, vars: GsapSetVars): void;
+};
+
+type ScrollTriggerRefresh = {
+  refresh(): void;
+};
+
+type FocusTrapActivator = (root: HTMLElement, preferred?: HTMLElement | null) => void;
+type FocusTrapReleaser = (restore?: boolean) => void;
+type BodySiblingsInertSetter = (dialog: HTMLElement, inert: boolean) => void;
+
+type PortfolioGrid = HTMLElement & {
+  dataset: DOMStringMap & {
+    pageSize?: string;
+  };
+};
+
+type PortfolioCard = HTMLElement & {
+  dataset: DOMStringMap & {
+    context?: string;
+    experimental?: string;
+    project?: string;
+  };
+};
+
+type FilterPill = HTMLElement & {
+  dataset: DOMStringMap & {
+    filter?: string;
+  };
+};
+
+type ProjectLink = HTMLElement & {
+  dataset: DOMStringMap & {
+    projectLink?: string;
+  };
+};
+
+type PagerButton = HTMLButtonElement;
+type PagerNums = HTMLElement;
+type PortfolioModal = HTMLElement;
+type PortfolioModalPanel = HTMLElement;
+type PortfolioModalInner = HTMLElement;
+type PortfolioModalTitle = HTMLElement;
+type PortfolioModalClose = HTMLElement;
+type PortfolioVideo = HTMLVideoElement;
+
+type InitPortfolioParams = {
+  $: QueryOne;
+  $$: QueryAll;
+  gsap: GsapSet;
+  ScrollTrigger: ScrollTriggerRefresh;
+  reduce: boolean;
+  on: ManagedEventListener;
+  setBodySiblingsInert: BodySiblingsInertSetter;
+  activateFocusTrap: FocusTrapActivator;
+  releaseFocusTrap: FocusTrapReleaser;
+};
+
+const getActiveHTMLElement = () =>
+  document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
 export function initPortfolio({
   $,
@@ -10,21 +85,21 @@ export function initPortfolio({
   setBodySiblingsInert,
   activateFocusTrap,
   releaseFocusTrap,
-}) {
+}: InitPortfolioParams) {
   /* ============ Selected Work — filter (by type) + pagination (6 per page) ============ */
-  const pfGrid = $("#pfGrid");
+  const pfGrid = $<PortfolioGrid>("#pfGrid");
   if (pfGrid){
-    const SIZE    = parseInt(pfGrid.dataset.pageSize, 10) || 6;
-    const cards   = $$(".pf-card");
-    const pager   = $("#pfPager");
-    const nums    = pager ? pager.querySelector(".pf-pager-nums") : null;
-    const prevBtn = pager ? pager.querySelector("[data-pf-prev]") : null;
-    const nextBtn = pager ? pager.querySelector("[data-pf-next]") : null;
-    const pills   = $$("#pfFilter [data-filter]");
-    let filter = "all";
+    const SIZE    = parseInt(pfGrid.dataset.pageSize ?? "", 10) || 6;
+    const cards   = $$<PortfolioCard>(".pf-card");
+    const pager   = $<HTMLElement>("#pfPager");
+    const nums    = pager ? pager.querySelector<PagerNums>(".pf-pager-nums") : null;
+    const prevBtn = pager ? pager.querySelector<PagerButton>("[data-pf-prev]") : null;
+    const nextBtn = pager ? pager.querySelector<PagerButton>("[data-pf-next]") : null;
+    const pills   = $$<FilterPill>("#pfFilter [data-filter]");
+    let filter: string | undefined = "all";
     let page = 1;
 
-    const matches = (card) =>
+    const matches = (card: PortfolioCard) =>
       filter === "all" ? true :
       filter === "experimental" ? card.dataset.experimental === "true" :
       card.dataset.context === filter;
@@ -47,7 +122,7 @@ export function initPortfolio({
 
       if (pager){
         pager.hidden = pageCount <= 1;
-        nums.textContent = "";
+        nums!.textContent = "";
         if (pageCount > 1){
           for (let i = 1; i <= pageCount; i++){
             const b = document.createElement("button");
@@ -57,10 +132,10 @@ export function initPortfolio({
             b.setAttribute("aria-label", "Page " + i);
             if (i === page) b.setAttribute("aria-current", "true");
             b.addEventListener("click", () => { page = i; pfRender(); });
-            nums.appendChild(b);
+            nums!.appendChild(b);
           }
-          prevBtn.disabled = page === 1;
-          nextBtn.disabled = page === pageCount;
+          prevBtn!.disabled = page === 1;
+          nextBtn!.disabled = page === pageCount;
         }
       }
       ScrollTrigger.refresh();
@@ -84,52 +159,53 @@ export function initPortfolio({
   }
 
   /* ============ portfolio project detail HUD (fade in / out) ============ */
-  const pfModal = $("#pfModal");
+  const pfModal = $<PortfolioModal>("#pfModal");
   if (pfModal){
-    const pfPanels = Array.prototype.slice.call(pfModal.querySelectorAll(".pf-modal-panel"));
-    let pfLastFocused = null;
+    const modal = pfModal;
+    const pfPanels = Array.from(modal.querySelectorAll<PortfolioModalPanel>(".pf-modal-panel"));
+    let pfLastFocused: HTMLElement | null = null;
 
-    function pfOpen(slug){
-      const panel = pfModal.querySelector('.pf-modal-panel[data-project="' + slug + '"]');
+    function pfOpen(slug: string | undefined){
+      const panel = modal.querySelector('.pf-modal-panel[data-project="' + slug + '"]');
       if (!panel) return;
-      pfLastFocused = document.activeElement;
+      pfLastFocused = getActiveHTMLElement();
       pfPanels.forEach(p => p.classList.toggle("is-active", p === panel));
-      pfModal.classList.add("is-open");
-      pfModal.setAttribute("aria-hidden", "false");
-      const title = panel.querySelector(".pf-modal-title");
-      if (title && title.id) pfModal.setAttribute("aria-labelledby", title.id);
-      setBodySiblingsInert(pfModal, true);
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      const title = panel.querySelector<PortfolioModalTitle>(".pf-modal-title");
+      if (title && title.id) modal.setAttribute("aria-labelledby", title.id);
+      setBodySiblingsInert(modal, true);
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";          // lock background scroll
-      panel.querySelector(".pf-modal-inner").scrollTop = 0;
-      if (!reduce) panel.querySelectorAll("video").forEach(v => { v.play().catch(() => {}); }); // muted autoplay
-      const closeBtn = panel.querySelector(".pf-modal-close");
-      activateFocusTrap(pfModal, closeBtn);
+      panel.querySelector<PortfolioModalInner>(".pf-modal-inner")!.scrollTop = 0;
+      if (!reduce) panel.querySelectorAll<PortfolioVideo>("video").forEach(v => { v.play().catch(() => {}); }); // muted autoplay
+      const closeBtn = panel.querySelector<PortfolioModalClose>(".pf-modal-close");
+      activateFocusTrap(modal, closeBtn);
     }
     function pfClose(){
-      if (!pfModal.classList.contains("is-open")) return;
-      pfModal.classList.remove("is-open");
-      pfModal.setAttribute("aria-hidden", "true");
-      pfModal.removeAttribute("aria-labelledby");
-      pfModal.querySelectorAll("video").forEach(v => { v.pause(); });  // stop playback when hidden
-      setBodySiblingsInert(pfModal, false);
+      if (!modal.classList.contains("is-open")) return;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      modal.removeAttribute("aria-labelledby");
+      modal.querySelectorAll<PortfolioVideo>("video").forEach(v => { v.pause(); });  // stop playback when hidden
+      setBodySiblingsInert(modal, false);
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       releaseFocusTrap(false);
       if (pfLastFocused){ try { pfLastFocused.focus({ preventScroll: true }); } catch (_) {} }
     }
 
-    $$(".pf-card").forEach(card => {
+    $$<PortfolioCard>(".pf-card").forEach(card => {
       card.addEventListener("click", () => { pfLastFocused = card; pfOpen(card.dataset.project); });
     });
     // résumé note → portfolio project deep link (opens the detail HUD on top of the drawer)
-    $$("[data-project-link]").forEach(link => {
+    $$<ProjectLink>("[data-project-link]").forEach(link => {
       link.addEventListener("click", () => { pfLastFocused = link; pfOpen(link.dataset.projectLink); });
     });
-    pfModal.querySelectorAll(".pf-modal-close").forEach(b => b.addEventListener("click", pfClose));
-    pfModal.addEventListener("click", (e) => { if (e.target === pfModal) pfClose(); });  // backdrop
+    modal.querySelectorAll<PortfolioModalClose>(".pf-modal-close").forEach(b => b.addEventListener("click", pfClose));
+    modal.addEventListener("click", (e) => { if (e.target === modal) pfClose(); });  // backdrop
     on(window, "keydown", (e) => {
-      if (e.key === "Escape" && pfModal.classList.contains("is-open")) pfClose();
+      if (e instanceof KeyboardEvent && e.key === "Escape" && modal.classList.contains("is-open")) pfClose();
     });
   }
 }
