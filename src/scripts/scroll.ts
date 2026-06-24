@@ -1,6 +1,7 @@
 // @ts-nocheck
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { queryAll as $$, queryOne as $ } from "./landing/dom";
 import { createFocusTrap, setBodySiblingsInert } from "./landing/focus-trap";
 import { initPageBehaviors } from "./landing/page-behaviors";
 import { initPortfolio } from "./landing/portfolio";
@@ -60,9 +61,6 @@ function initLanding() {
 const LABELS = ["Unit", "Identity", "Expertise", "Philosophy", "Operational"];
 const BOUNDS = [0.15, 0.37, 0.59, 0.81];   // progress thresholds → active section
 const FRAME_COUNT = 60;                     // assets/frames/f00.jpg … f59.jpg
-
-const $  = (s) => document.querySelector(s);
-const $$ = (s) => Array.prototype.slice.call(document.querySelectorAll(s));
 
 const veil      = $("#veil");
 const canvas    = $("#seqCanvas");
