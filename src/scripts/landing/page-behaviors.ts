@@ -1,4 +1,27 @@
-// @ts-nocheck
+type QueryOne = <T extends Element = Element>(selector: string) => T | null;
+type QueryAll = <T extends Element = Element>(selector: string) => T[];
+type AddManagedListener = (
+  target: EventTarget,
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: AddEventListenerOptions | boolean,
+) => void;
+
+interface PageBehaviorsOptions {
+  $: QueryOne;
+  $$: QueryAll;
+  gsap: GSAP;
+  timeline: GSAPTimeline;
+  reduce: boolean;
+  on: AddManagedListener;
+  railSegs: HTMLElement[];
+  targetProgress: number[];
+  closeResume: () => void;
+}
+
+interface PageBehaviors {
+  smoothScrollTo: (y: number) => void;
+}
 
 export function initPageBehaviors({
   $,
@@ -10,14 +33,14 @@ export function initPageBehaviors({
   railSegs,
   targetProgress,
   closeResume,
-}) {
+}: PageBehaviorsOptions): PageBehaviors {
   /* gsap-driven smooth scroll. Native scrollTo({behavior:"smooth"}) is silently
      cancelled a few hundred px in by ScrollTrigger's pinning of #stage, so the
      page never reaches the target. We drive window.scroll ourselves on the gsap
      ticker instead, which ScrollTrigger cooperates with. */
-  let scrollTween = null;
-  const setScroll = (v) => window.scrollTo({ top: v, left: 0, behavior: "auto" });
-  function smoothScrollTo(y){
+  let scrollTween: GSAPTween | null = null;
+  const setScroll = (v: number) => window.scrollTo({ top: v, left: 0, behavior: "auto" });
+  function smoothScrollTo(y: number){
     // clamp to the real scrollable range so the tween can't overshoot/undershoot
     const max = document.documentElement.scrollHeight - window.innerHeight;
     y = Math.max(0, Math.min(Math.round(y), max));
@@ -37,24 +60,26 @@ export function initPageBehaviors({
     seg.setAttribute("role", "button");
     seg.setAttribute("tabindex", "0");
     const go = () => {
+      if (!stMain) return;
       const y = stMain.start + targetProgress[i] * (stMain.end - stMain.start);
       smoothScrollTo(y);
     };
     on(seg, "click", go);
-    on(seg, "keydown", (e) => {
+    on(seg, "keydown", (event) => {
+      const e = event as KeyboardEvent;
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
     });
   });
 
   /* ============ OUTRO parallax + reveal ============ */
-  const outroBg = $(".outro-bg");
+  const outroBg = $<HTMLElement>(".outro-bg");
   if (outroBg){
     gsap.to(outroBg, {
       yPercent: -22, ease: "none",
       scrollTrigger: { trigger: ".outro", start: "top bottom", end: "bottom top", scrub: true }
     });
   }
-  $$(".anim-up").forEach(el => {
+  $$<HTMLElement>(".anim-up").forEach(el => {
     // fromTo (not from): pin the end state explicitly to autoAlpha:1 / y:0. A bare
     // gsap.from() captures the element's CURRENT values as the destination — and
     // initLanding runs twice on a landing visit (the module's own call, then
@@ -72,17 +97,18 @@ export function initPageBehaviors({
   });
 
   /* nav scrolled state */
-  const nav = $("#nav");
+  const nav = $<HTMLElement>("#nav");
   on(window, "scroll", () => {
     nav?.classList.toggle("scrolled", window.scrollY > 40);
   }, { passive: true });
 
   /* ============ smooth in-page anchor scrolling (#portfolio, #contact, …) ============ */
-  $$('a[href^="#"]').forEach(a => {
-    on(a, "click", (e) => {
+  $$<HTMLAnchorElement>('a[href^="#"]').forEach(a => {
+    on(a, "click", (event) => {
+      const e = event as MouseEvent;
       const id = a.getAttribute("href");
       if (!id || id.length < 2) return;
-      const target = document.querySelector(id);
+      const target = document.querySelector<HTMLElement>(id);
       if (!target) return;
       e.preventDefault();
       closeResume();  // close the résumé first
@@ -92,7 +118,7 @@ export function initPageBehaviors({
   });
 
   /* ============ brand wordmark → reset to top of the site ============ */
-  const brandHome = $("#brandHome");
+  const brandHome = $<HTMLElement>("#brandHome");
   if (brandHome){
     function goHome(){
       closeResume();  // close the résumé first
@@ -100,7 +126,8 @@ export function initPageBehaviors({
       smoothScrollTo(0);
     }
     on(brandHome, "click", goHome);
-    on(brandHome, "keydown", (e) => {
+    on(brandHome, "keydown", (event) => {
+      const e = event as KeyboardEvent;
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goHome(); }
     });
   }
