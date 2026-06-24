@@ -1,0 +1,122 @@
+---
+import LandingResumeDrawer from '~/components/landing/LandingResumeDrawer.astro';
+import type { ResumeData } from '~/utils/landing';
+
+interface Props {
+  resumeData: ResumeData;
+  projectSlugs: Set<string>;
+}
+
+const { resumeData, projectSlugs } = Astro.props;
+---
+
+<section class="scrolly" id="scrolly">
+  <div class="stage" id="stage" data-screen-label="Sequence">
+
+    <div class="video-wrap" id="videoWrap">
+      <canvas id="seqCanvas"></canvas>
+    </div>
+
+    <div class="scrim vig"></div>
+    <div class="scrim left" id="scrimLeft"></div>
+    <div class="scrim bottom"></div>
+
+    <!-- HUD frame -->
+    <div class="hud" id="hud">
+      <span class="br tl"></span><span class="br tr"></span>
+      <span class="br bl"></span><span class="br br2"></span>
+      <span class="reticle" id="reticle"></span>
+    </div>
+
+    <div class="telemetry" id="telemetry">
+      <span class="row code"><span class="dot"></span>FACTORY CODE · MONOIDX</span>
+      <span class="row">ROT <span class="v ang" id="angle">000°</span></span>
+      <span class="row">SEQ <span class="v" id="seq">00 / 05</span></span>
+      <span class="row">SYS <span class="v">NOMINAL</span></span>
+    </div>
+
+    <!-- right progress rail -->
+    <div class="rail" id="rail">
+      <div class="seg" data-i="0"><span>Identity</span><span class="tick"></span></div>
+      <div class="seg" data-i="1"><span>Origin</span><span class="tick"></span></div>
+      <div class="seg" data-i="2"><span>Expertise</span><span class="tick"></span></div>
+      <div class="seg" data-i="3"><span>Philosophy</span><span class="tick"></span></div>
+      <div class="seg" data-i="4"><span>Operational</span><span class="tick"></span></div>
+    </div>
+
+    <!-- big index -->
+    <div class="stage-index">
+      <span class="big" id="idxBig">00</span><span class="sep">/</span><span>05</span>
+      <span class="sep">—</span><span id="idxLabel">SEQUENCE</span>
+      <span class="idx-slider" id="expSlider">
+        <span class="track" id="expSliderTrack"><span class="fill" id="expSliderFill"></span></span>
+        <button class="knob" id="expSliderKnob" type="button" role="slider" aria-label="Drag to reveal professional experience" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></button>
+        <span class="slide-label">Slide to show</span>
+      </span>
+    </div>
+
+    <!-- ACT PANELS -->
+    <div class="acts">
+
+      <div class="act act-hero" id="act0">
+        <div class="eyebrow no-rule">MX-1 · UNIT-07 · OPERATIONAL</div>
+        <h1>MONOIDX</h1>
+        <div class="role">Apple Platform Engineer</div>
+        <div class="stmt"><span>Building systems.</span><span class="m">Shaping platforms.</span></div>
+      </div>
+
+      <div class="act" id="act1">
+        <div class="eyebrow">Section 01 — Identity</div>
+        <h2>What is<br>MONOIDX?</h2>
+        <p class="lede"><b>A digital engineering identity</b> focused on Apple platforms, software architecture and intelligent systems.</p>
+      </div>
+
+      <div class="act" id="act2">
+        <div class="act2-body" id="act2Body">
+          <div class="eyebrow">Section 02 — Expertise</div>
+          <h2>Disciplines</h2>
+          <div class="chips" id="chips">
+            <span class="chip">Swift</span><span class="chip">SwiftUI</span>
+            <span class="chip">iOS</span><span class="chip">iPadOS</span>
+            <span class="chip">macOS</span><span class="chip">visionOS</span>
+            <span class="chip">Platform Architecture</span><span class="chip">AI Assisted Dev</span>
+          </div>
+          <button class="exp-cue" id="expCue" type="button" aria-controls="resumeDrawer" aria-expanded="false">
+            Professional Experience
+            <span class="exp-scroll">Scroll<span class="hline"></span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="act" id="act3">
+        <div class="eyebrow">Section 03 — Philosophy</div>
+        <h2>Through<br>Simplicity</h2>
+        <div class="tenets" id="tenets">
+          <div class="tenet"><span class="n">01</span><span class="t">Design for longevity.</span></div>
+          <div class="tenet"><span class="n">02</span><span class="t">Reduce complexity.</span></div>
+          <div class="tenet"><span class="n">03</span><span class="t">Automate repetition.</span></div>
+          <div class="tenet"><span class="n">04</span><span class="t">Build resilient systems.</span></div>
+          <div class="tenet"><span class="n">05</span><span class="t">Stay invisible.</span></div>
+        </div>
+      </div>
+
+      <div class="act" id="act4">
+        <div class="eyebrow">Section 04 — Operating System</div>
+        <h2>Operational</h2>
+        <div class="manifest" id="manifest">
+          <div class="mrow"><span class="k">Factory Code</span><span class="v code">MONOIDX</span></div>
+          <div class="mrow"><span class="k">Unit</span><span class="v code">MX-1 · UNIT-07</span></div>
+          <div class="mrow"><span class="k">Role</span><span class="v">Apple Platform Engineer</span></div>
+          <div class="mrow"><span class="k">Status</span><span class="v"><span class="led"></span>Operational</span></div>
+        </div>
+        <a class="op-portfolio" href="#portfolio"><span>Portfolio</span><span class="ar">↗</span></a>
+      </div>
+
+    </div>
+
+    <!-- centered "Professional Experience" resume HUD panel (driven by the scroll module) -->
+    <LandingResumeDrawer resumeData={resumeData} projectSlugs={projectSlugs} />
+
+    <div class="cue" id="cue">Scroll<span class="line"></span></div>
+  </div>
+</section>
