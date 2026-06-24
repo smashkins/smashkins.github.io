@@ -4,101 +4,19 @@ import MusicPlayer from '~/components/MusicPlayer.astro';
 import NavMenu from '~/components/NavMenu.astro';
 import NowPlaying from '~/components/NowPlaying.astro';
 import ToTop from '~/components/ToTop.astro';
+import LandingPortfolio from '~/components/landing/LandingPortfolio.astro';
+import LandingPortfolioModal from '~/components/landing/LandingPortfolioModal.astro';
+import LandingResumeDrawer from '~/components/landing/LandingResumeDrawer.astro';
 import { frontmatter as resume } from '~/data/resume.md';
 import { frontmatter as portfolio } from '~/data/portfolio.md';
-
-type ProjectContext = 'employed' | 'freelance' | 'indie';
-interface TextLink {
-  label: string;
-  href: string;
-}
-interface ResumeJob {
-  role: string;
-  period: string;
-  org: string;
-  note?: string;
-  notes?: string[];
-}
-interface ResumeMetaRow {
-  label: string;
-  value: string;
-  note?: string;
-  led?: boolean;
-}
-interface ResumeSkillGroup {
-  category: string;
-  items?: string[];
-}
-interface ResumeData {
-  name: string;
-  role: string;
-  summary: string;
-  jobs?: ResumeJob[];
-  meta?: ResumeMetaRow[];
-  skills?: ResumeSkillGroup[];
-  metaAfter?: ResumeMetaRow[];
-  portfolio?: TextLink[];
-}
-interface PortfolioSpec {
-  label: string;
-  value: string;
-}
-type PortfolioVideo = string | { src: string; poster?: string };
-interface PortfolioProject {
-  slug: string;
-  context: ProjectContext;
-  experimental?: boolean;
-  platform: string;
-  title: string;
-  date?: string;
-  summary: string;
-  description?: string;
-  specs?: PortfolioSpec[];
-  images?: string[];
-  videos?: PortfolioVideo[];
-  links?: TextLink[];
-}
-interface PortfolioData {
-  eyebrow?: string;
-  title?: string;
-  intro?: string;
-  projects?: PortfolioProject[];
-}
-type NoteSegment = { text: string; project?: string };
+import { getPortfolioFilters, type PortfolioData, type ResumeData } from '~/utils/landing';
 
 const resumeData = resume as ResumeData;
 const portfolioData = portfolio as PortfolioData;
 const pfProjects = portfolioData.projects ?? [];
-const PF_PAGE_SIZE = 6;                                       // Selected Work: projects per page
-
-// Filter pills are derived from the projects' `context` + `experimental` fields.
-const PF_CONTEXT_ORDER = ['employed', 'freelance', 'indie'] as const;
-const PF_CONTEXT_LABELS: Record<ProjectContext, string> = { employed: 'Employed', freelance: 'Freelance', indie: 'Indie' };
-const pfContexts = PF_CONTEXT_ORDER.filter((c) => pfProjects.some((p) => p.context === c));
-const pfHasExperimental = pfProjects.some((p) => p.experimental);
-const pfHasFilters = pfContexts.length > 1 || pfHasExperimental;
-
-// Parse a note string into text / project-link segments.
-// Syntax in resume.md:  [Eolo](project:eolo)  →  links the word "Eolo" to the
-// portfolio project whose slug is "eolo" (opens its detail HUD on click).
 const pfSlugs = new Set(pfProjects.map((p) => p.slug));
-function parseNote(text: string): NoteSegment[] {
-  const segments: NoteSegment[] = [];
-  const re = /\[([^\]]+)\]\(project:([^)]+)\)/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) segments.push({ text: text.slice(last, m.index) });
-    segments.push({ text: m[1], project: m[2] });
-    last = m.index + m[0].length;
-  }
-  if (last < text.length) segments.push({ text: text.slice(last) });
-  return segments;
-}
-
-function hasItems<T>(items: T[] | undefined): items is T[] {
-  return Array.isArray(items) && items.length > 0;
-}
+const { contexts: pfContexts, hasExperimental: pfHasExperimental, hasFilters: pfHasFilters } =
+  getPortfolioFilters(pfProjects);
 ---
 
 <BaseLayout
@@ -247,203 +165,23 @@ function hasItems<T>(items: T[] | undefined): items is T[] {
       </div>
 
       <!-- centered "Professional Experience" resume HUD panel (driven by the scroll module) -->
-      <aside class="resume-drawer" id="resumeDrawer" role="dialog" aria-label="Professional Experience" aria-hidden="true">
-        <div class="rd-panel" id="rdPanel">
-          <span class="br tl"></span><span class="br tr"></span>
-          <span class="br bl"></span><span class="br br2"></span>
-          <button class="rd-close" id="rdClose" type="button" aria-label="Close">×</button>
-          <div class="rd-inner">
-            <div class="rd-head">
-              <div class="eyebrow no-rule">Section 02 · Curriculum</div>
-            </div>
-
-            <div class="rd-id">
-              <h3 id="resume-title">{resumeData.name}</h3>
-              <div class="rd-role">{resumeData.role}</div>
-              <p class="rd-sum">{resumeData.summary}</p>
-            </div>
-
-            <div class="rd-exp">
-              {resumeData.jobs?.map((job) => (
-                <div class="rd-job">
-                  <div class="rd-job-h">
-                    <span class="rd-job-role">{job.role}</span>
-                    <span class="rd-job-when">{job.period}</span>
-                  </div>
-                  <div class="rd-job-org">{job.org}</div>
-                  {hasItems(job.notes) ? (
-                    <ul class="rd-job-notes">
-                      {job.notes.map((n) => (
-                        <li>{parseNote(n).map((s) => (
-                          s.project && pfSlugs.has(s.project)
-                            ? <button type="button" class="rd-note-link" data-project-link={s.project}>{s.text}</button>
-                            : s.text
-                        ))}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    job.note && (
-                      <p class="rd-job-note">{parseNote(job.note).map((s) => (
-                        s.project && pfSlugs.has(s.project)
-                          ? <button type="button" class="rd-note-link" data-project-link={s.project}>{s.text}</button>
-                          : s.text
-                      ))}</p>
-                    )
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div class="rd-meta">
-              {resumeData.meta?.map((row) => (
-                <div class="rd-mrow">
-                  <span class="k">{row.label}</span>
-                  <div class="rd-mval">
-                    <span class="v">{row.led && <span class="led"></span>}{row.value}</span>
-                    {row.note && <span class="rd-mrow-note">{row.note}</span>}
-                  </div>
-                </div>
-              ))}
-              {hasItems(resumeData.skills) && (
-                <div class="rd-mrow">
-                  <span class="k">Core Skills</span>
-                  <div class="rd-skill-groups">
-                    {resumeData.skills.map((group) => (
-                      <div class="rd-skill-group">
-                        <span class="rd-skill-cat">{group.category}</span>
-                        <span class="rd-skill-items">{group.items?.join(' · ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {resumeData.metaAfter?.map((row) => (
-                <div class="rd-mrow">
-                  <span class="k">{row.label}</span>
-                  <div class="rd-mval">
-                    <span class="v">{row.led && <span class="led"></span>}{row.value}</span>
-                    {row.note && <span class="rd-mrow-note">{row.note}</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {hasItems(resumeData.portfolio) && (
-              <div class="rd-portfolio">
-                {resumeData.portfolio.map((link) => (
-                  <a class="rd-portfolio-link" href={link.href}><span>{link.label}</span><span class="ar">↗</span></a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
+      <LandingResumeDrawer resumeData={resumeData} projectSlugs={pfSlugs} />
 
       <div class="cue" id="cue">Scroll<span class="line"></span></div>
     </div>
   </section>
 
   <!-- ===================== PORTFOLIO ===================== -->
-  <section class="portfolio" id="portfolio" data-screen-label="Portfolio">
-    <div class="portfolio-bg" data-depth="0.4"><span>WORK</span></div>
-    <div class="wrap pf-wrap">
-      <span class="eyebrow anim-up">{portfolioData.eyebrow ?? 'Section 05 — Portfolio'}</span>
-      <h2 class="pf-title anim-up">{portfolioData.title ?? 'Selected Work'}</h2>
-      {portfolioData.intro && <p class="pf-lede anim-up">{portfolioData.intro}</p>}
-
-      {pfHasFilters && (
-        <div class="pf-filter anim-up" id="pfFilter" role="group" aria-label="Filter projects by type">
-          <button class="pf-filter-pill is-active" type="button" data-filter="all" aria-pressed="true">All</button>
-          {pfContexts.map((c) => (
-            <button class="pf-filter-pill" type="button" data-filter={c} aria-pressed="false">{PF_CONTEXT_LABELS[c]}</button>
-          ))}
-          {pfHasExperimental && (
-            <button class="pf-filter-pill" type="button" data-filter="experimental" aria-pressed="false">Experimental</button>
-          )}
-        </div>
-      )}
-
-      <div class="pf-grid" id="pfGrid" data-page-size={PF_PAGE_SIZE}>
-        {pfProjects.map((p, i) => (
-          <button
-            class="pf-card anim-up"
-            type="button"
-            data-project={p.slug}
-            data-context={p.context}
-            data-experimental={p.experimental ? 'true' : 'false'}
-            aria-haspopup="dialog"
-            hidden={i >= PF_PAGE_SIZE}
-          >
-            <span class="pf-n">{String(i + 1).padStart(2, '0')}</span>
-            <div class="pf-card-body">
-              <span class="pf-tag">{p.platform}</span>
-              <span class="pf-name">{p.title}</span>
-              <p class="pf-desc">{p.summary}</p>
-            </div>
-            <span class="ar">↗</span>
-          </button>
-        ))}
-      </div>
-
-      <nav class="pf-pager anim-up" id="pfPager" aria-label="Selected work pages" hidden>
-        <button class="pf-pager-arrow" type="button" data-pf-prev aria-label="Previous projects" disabled>←</button>
-        <div class="pf-pager-nums"></div>
-        <button class="pf-pager-arrow" type="button" data-pf-next aria-label="Next projects">→</button>
-      </nav>
-    </div>
-  </section>
+  <LandingPortfolio
+    portfolioData={portfolioData}
+    projects={pfProjects}
+    contexts={pfContexts}
+    hasExperimental={pfHasExperimental}
+    hasFilters={pfHasFilters}
+  />
 
   <!-- ===================== PORTFOLIO PROJECT HUD (fade in/out) ===================== -->
-  <div class="pf-modal" id="pfModal" role="dialog" aria-modal="true" aria-label="Project details" aria-hidden="true">
-    {pfProjects.map((p) => (
-      <div class="pf-modal-panel" data-project={p.slug}>
-        <span class="br tl"></span><span class="br tr"></span>
-        <span class="br bl"></span><span class="br br2"></span>
-        <button class="rd-close pf-modal-close" type="button" aria-label="Close">×</button>
-        <div class="pf-modal-inner">
-          <div class="eyebrow no-rule pf-modal-eyebrow">{p.platform}</div>
-          <div class="pf-modal-head">
-            <h3 class="pf-modal-title" id={`project-title-${p.slug}`}>{p.title}</h3>
-            {p.date && <span class="pf-modal-date">{p.date}</span>}
-          </div>
-          {p.description && <p class="pf-modal-desc">{p.description}</p>}
-
-          {hasItems(p.specs) && (
-            <div class="pf-specs">
-              {p.specs.map((s) => (
-                <div class="pf-spec-row"><span class="k">{s.label}</span><span class="v">{s.value}</span></div>
-              ))}
-            </div>
-          )}
-
-          {(hasItems(p.images) || hasItems(p.videos)) && (
-            <div class="pf-gallery">
-              {p.images?.map((src) => (
-                <img src={src} alt={`${p.title} — preview`} loading="lazy" />
-              ))}
-              {p.videos?.map((v) => {
-                const vsrc = typeof v === 'string' ? v : v.src;
-                const poster = typeof v === 'object' && v ? v.poster : undefined;
-                return (
-                  <video class="pf-video" muted loop playsinline controls preload="metadata" poster={poster}>
-                    <source src={vsrc} type="video/mp4" />
-                  </video>
-                );
-              })}
-            </div>
-          )}
-
-          {hasItems(p.links) && (
-            <div class="pf-modal-links">
-              {p.links.map((link) => (
-                <a class="rd-portfolio-link" href={link.href} target="_blank" rel="noopener noreferrer"><span>{link.label}</span><span class="ar">↗</span></a>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    ))}
-  </div>
+  <LandingPortfolioModal projects={pfProjects} />
 
   <!-- ===================== CONTACT ===================== -->
   <section class="outro" id="contact" data-screen-label="Contact">

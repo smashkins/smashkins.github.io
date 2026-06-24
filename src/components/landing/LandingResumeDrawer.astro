@@ -1,0 +1,102 @@
+---
+import { hasItems, parseNote, type ResumeData } from '~/utils/landing';
+
+interface Props {
+  resumeData: ResumeData;
+  projectSlugs: Set<string>;
+}
+
+const { resumeData, projectSlugs } = Astro.props;
+---
+
+<aside class="resume-drawer" id="resumeDrawer" role="dialog" aria-label="Professional Experience" aria-hidden="true">
+  <div class="rd-panel" id="rdPanel">
+    <span class="br tl"></span><span class="br tr"></span>
+    <span class="br bl"></span><span class="br br2"></span>
+    <button class="rd-close" id="rdClose" type="button" aria-label="Close">×</button>
+    <div class="rd-inner">
+      <div class="rd-head">
+        <div class="eyebrow no-rule">Section 02 · Curriculum</div>
+      </div>
+
+      <div class="rd-id">
+        <h3 id="resume-title">{resumeData.name}</h3>
+        <div class="rd-role">{resumeData.role}</div>
+        <p class="rd-sum">{resumeData.summary}</p>
+      </div>
+
+      <div class="rd-exp">
+        {resumeData.jobs?.map((job) => (
+          <div class="rd-job">
+            <div class="rd-job-h">
+              <span class="rd-job-role">{job.role}</span>
+              <span class="rd-job-when">{job.period}</span>
+            </div>
+            <div class="rd-job-org">{job.org}</div>
+            {hasItems(job.notes) ? (
+              <ul class="rd-job-notes">
+                {job.notes.map((n) => (
+                  <li>{parseNote(n).map((s) => (
+                    s.project && projectSlugs.has(s.project)
+                      ? <button type="button" class="rd-note-link" data-project-link={s.project}>{s.text}</button>
+                      : s.text
+                  ))}</li>
+                ))}
+              </ul>
+            ) : (
+              job.note && (
+                <p class="rd-job-note">{parseNote(job.note).map((s) => (
+                  s.project && projectSlugs.has(s.project)
+                    ? <button type="button" class="rd-note-link" data-project-link={s.project}>{s.text}</button>
+                    : s.text
+                ))}</p>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div class="rd-meta">
+        {resumeData.meta?.map((row) => (
+          <div class="rd-mrow">
+            <span class="k">{row.label}</span>
+            <div class="rd-mval">
+              <span class="v">{row.led && <span class="led"></span>}{row.value}</span>
+              {row.note && <span class="rd-mrow-note">{row.note}</span>}
+            </div>
+          </div>
+        ))}
+        {hasItems(resumeData.skills) && (
+          <div class="rd-mrow">
+            <span class="k">Core Skills</span>
+            <div class="rd-skill-groups">
+              {resumeData.skills.map((group) => (
+                <div class="rd-skill-group">
+                  <span class="rd-skill-cat">{group.category}</span>
+                  <span class="rd-skill-items">{group.items?.join(' · ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {resumeData.metaAfter?.map((row) => (
+          <div class="rd-mrow">
+            <span class="k">{row.label}</span>
+            <div class="rd-mval">
+              <span class="v">{row.led && <span class="led"></span>}{row.value}</span>
+              {row.note && <span class="rd-mrow-note">{row.note}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {hasItems(resumeData.portfolio) && (
+        <div class="rd-portfolio">
+          {resumeData.portfolio.map((link) => (
+            <a class="rd-portfolio-link" href={link.href}><span>{link.label}</span><span class="ar">↗</span></a>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</aside>

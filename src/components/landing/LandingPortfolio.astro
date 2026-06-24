@@ -1,0 +1,68 @@
+---
+import {
+  PF_CONTEXT_LABELS,
+  PF_PAGE_SIZE,
+  type PortfolioData,
+  type PortfolioProject,
+  type ProjectContext,
+} from '~/utils/landing';
+
+interface Props {
+  portfolioData: PortfolioData;
+  projects: PortfolioProject[];
+  contexts: readonly ProjectContext[];
+  hasExperimental: boolean;
+  hasFilters: boolean;
+}
+
+const { portfolioData, projects, contexts, hasExperimental, hasFilters } = Astro.props;
+---
+
+<section class="portfolio" id="portfolio" data-screen-label="Portfolio">
+  <div class="portfolio-bg" data-depth="0.4"><span>WORK</span></div>
+  <div class="wrap pf-wrap">
+    <span class="eyebrow anim-up">{portfolioData.eyebrow ?? 'Section 05 — Portfolio'}</span>
+    <h2 class="pf-title anim-up">{portfolioData.title ?? 'Selected Work'}</h2>
+    {portfolioData.intro && <p class="pf-lede anim-up">{portfolioData.intro}</p>}
+
+    {hasFilters && (
+      <div class="pf-filter anim-up" id="pfFilter" role="group" aria-label="Filter projects by type">
+        <button class="pf-filter-pill is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+        {contexts.map((c) => (
+          <button class="pf-filter-pill" type="button" data-filter={c} aria-pressed="false">{PF_CONTEXT_LABELS[c]}</button>
+        ))}
+        {hasExperimental && (
+          <button class="pf-filter-pill" type="button" data-filter="experimental" aria-pressed="false">Experimental</button>
+        )}
+      </div>
+    )}
+
+    <div class="pf-grid" id="pfGrid" data-page-size={PF_PAGE_SIZE}>
+      {projects.map((p, i) => (
+        <button
+          class="pf-card anim-up"
+          type="button"
+          data-project={p.slug}
+          data-context={p.context}
+          data-experimental={p.experimental ? 'true' : 'false'}
+          aria-haspopup="dialog"
+          hidden={i >= PF_PAGE_SIZE}
+        >
+          <span class="pf-n">{String(i + 1).padStart(2, '0')}</span>
+          <div class="pf-card-body">
+            <span class="pf-tag">{p.platform}</span>
+            <span class="pf-name">{p.title}</span>
+            <p class="pf-desc">{p.summary}</p>
+          </div>
+          <span class="ar">↗</span>
+        </button>
+      ))}
+    </div>
+
+    <nav class="pf-pager anim-up" id="pfPager" aria-label="Selected work pages" hidden>
+      <button class="pf-pager-arrow" type="button" data-pf-prev aria-label="Previous projects" disabled>←</button>
+      <div class="pf-pager-nums"></div>
+      <button class="pf-pager-arrow" type="button" data-pf-next aria-label="Next projects">→</button>
+    </nav>
+  </div>
+</section>
