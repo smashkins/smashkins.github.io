@@ -5,15 +5,18 @@ import NavMenu from '~/components/NavMenu.astro';
 import NowPlaying from '~/components/NowPlaying.astro';
 import ToTop from '~/components/ToTop.astro';
 import LandingContact from '~/components/landing/LandingContact.astro';
+import LandingIdentityModal from '~/components/landing/LandingIdentityModal.astro';
 import LandingPortfolio from '~/components/landing/LandingPortfolio.astro';
 import LandingPortfolioModal from '~/components/landing/LandingPortfolioModal.astro';
 import LandingSequence from '~/components/landing/LandingSequence.astro';
 import { frontmatter as resume } from '~/data/resume.md';
 import { frontmatter as portfolio } from '~/data/portfolio.md';
-import { getPortfolioFilters, type PortfolioData, type ResumeData } from '~/utils/landing';
+import { frontmatter as identity } from '~/data/identity.md';
+import { getPortfolioFilters, type IdentityData, type PortfolioData, type ResumeData } from '~/utils/landing';
 
 const resumeData = resume as ResumeData;
 const portfolioData = portfolio as PortfolioData;
+const identityData = identity as IdentityData;
 const pfProjects = portfolioData.projects ?? [];
 const pfSlugs = new Set(pfProjects.map((p) => p.slug));
 const { contexts: pfContexts, hasExperimental: pfHasExperimental, hasFilters: pfHasFilters } =
@@ -71,6 +74,9 @@ const { contexts: pfContexts, hasExperimental: pfHasExperimental, hasFilters: pf
     hasExperimental={pfHasExperimental}
     hasFilters={pfHasFilters}
   />
+
+  <!-- ===================== IDENTITY HUD (fade in/out) ===================== -->
+  <LandingIdentityModal identityData={identityData} />
 
   <!-- ===================== PORTFOLIO PROJECT HUD (fade in/out) ===================== -->
   <LandingPortfolioModal projects={pfProjects} />

@@ -1,0 +1,80 @@
+---
+// Identity detail HUD — opened by the "More »" cue in Section 01.
+// Mirrors the portfolio modal pattern (page-level fixed overlay, shared .pf-modal styling).
+// Content is configured in src/data/identity.md.
+import { hasItems, type IdentityData } from '~/utils/landing';
+
+interface Props {
+  identityData: IdentityData;
+}
+
+const { identityData } = Astro.props;
+---
+
+<div class="pf-modal" id="identityModal" role="dialog" aria-modal="true" aria-label="Identity" aria-hidden="true">
+  <div class="pf-modal-panel is-active">
+    <span class="br tl"></span><span class="br tr"></span>
+    <span class="br bl"></span><span class="br br2"></span>
+    <button class="rd-close pf-modal-close" type="button" aria-label="Close">×</button>
+    <div class="pf-modal-inner">
+      {identityData.eyebrow && <div class="eyebrow no-rule pf-modal-eyebrow">{identityData.eyebrow}</div>}
+      <div class="pf-modal-head">
+        <h3 class="pf-modal-title" id="identity-title">{identityData.title}</h3>
+        {identityData.badge && <span class="pf-modal-date">{identityData.badge}</span>}
+      </div>
+
+      {identityData.paragraphs?.map((para) => (
+        <p class="pf-modal-desc">{para}</p>
+      ))}
+
+      {hasItems(identityData.specs) && (
+        <div class="pf-specs">
+          {identityData.specs.map((spec) => (
+            <div class="pf-spec-row"><span class="k">{spec.label}</span><span class="v">{spec.value}</span></div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('identityModal');
+  if (modal) {
+    const openers = Array.from(document.querySelectorAll<HTMLElement>('[data-identity-open]'));
+    const closeBtn = modal.querySelector<HTMLElement>('.pf-modal-close');
+    const inner = modal.querySelector<HTMLElement>('.pf-modal-inner');
+    let lastFocused: HTMLElement | null = null;
+
+    const openModal = () => {
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      modal.setAttribute('aria-labelledby', 'identity-title');
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      if (inner) inner.scrollTop = 0;
+      openers.forEach((o) => o.setAttribute('aria-expanded', 'true'));
+      closeBtn?.focus();
+    };
+
+    const closeModal = () => {
+      if (!modal.classList.contains('is-open')) return;
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      openers.forEach((o) => o.setAttribute('aria-expanded', 'false'));
+      if (lastFocused) {
+        try { lastFocused.focus({ preventScroll: true }); } catch (_) {}
+      }
+    };
+
+    openers.forEach((o) => o.addEventListener('click', openModal));
+    closeBtn?.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    });
+  }
+</script>

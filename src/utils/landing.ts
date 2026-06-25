@@ -65,6 +65,14 @@ export interface PortfolioData {
   projects?: PortfolioProject[];
 }
 
+export interface IdentityData {
+  eyebrow?: string;
+  title: string;
+  badge?: string;
+  paragraphs?: string[];
+  specs?: PortfolioSpec[];
+}
+
 export interface NoteSegment {
   text: string;
   project?: string;
