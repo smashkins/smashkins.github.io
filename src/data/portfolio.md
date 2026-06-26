@@ -169,8 +169,6 @@ projects:
     summary: "Some experiments conducted way back in 2016 when Apple did not yet have its own AI frameworks but there were some third-party libraries that made it possible to create the first AI prototypes. It wasn't yet the era of LLMs and AI was limited to machine learning and OCR scanning..."
     description: |
       Some experiments conducted way back in 2016 when Apple did not yet have its own AI frameworks but there were some third-party libraries that made it possible to create the first AI prototypes. It wasn't yet the era of LLMs and AI was limited to machine learning and OCR scanning.
-
-
     specs:
       - label: "Platform"
         value: "iPadOS · iOS"
@@ -180,6 +178,7 @@ projects:
     videos:
       # mp4 files under public/assets/portfolio/<slug>/ ; optional `poster` image
       - src: "/assets/portfolio/watsonai/visual_recognition_ios_with_watson_ibm_sdk_v1(240p).mp4"
+      - src: "/assets/portfolio/watsonai/ios_11_arkit_&_machine_learning_dev_tests_v1 (1080p).mp4"
     links: []
 ---
 
