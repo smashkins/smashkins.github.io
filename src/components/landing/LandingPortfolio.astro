@@ -57,6 +57,8 @@ const cards = await Promise.all(
           <div class="pf-card-body">
             <span class="pf-tag">{p.platform}</span>
             {p.date && <span class="pf-date">{p.date}</span>}
+            {p.client && <span class="pf-client">{p.client}</span>}
+            <span class="pf-context">{PF_CONTEXT_LABELS[p.context]}</span>
             <span class="pf-name">{p.title}</span>
             <div class="pf-desc" set:html={summaryHtml} />
           </div>

@@ -1,5 +1,5 @@
 ---
-import { hasItems, type PortfolioProject } from '~/utils/landing';
+import { hasItems, PF_CONTEXT_LABELS, type PortfolioProject } from '~/utils/landing';
 import { renderMarkdown } from '~/utils/markdown';
 
 interface Props {
@@ -27,13 +27,13 @@ const panels = await Promise.all(
         </div>
         {descriptionHtml && <div class="pf-modal-desc" set:html={descriptionHtml} />}
 
-        {hasItems(p.specs) && (
-          <div class="pf-specs">
-            {p.specs.map((s) => (
-              <div class="pf-spec-row"><span class="k">{s.label}</span><span class="v">{s.value}</span></div>
-            ))}
-          </div>
-        )}
+        <div class="pf-specs">
+          {p.specs?.map((s) => (
+            <div class="pf-spec-row"><span class="k">{s.label}</span><span class="v">{s.value}</span></div>
+          ))}
+          {p.client && <div class="pf-spec-row"><span class="k">Client</span><span class="v">{p.client}</span></div>}
+          <div class="pf-spec-row"><span class="k">Context</span><span class="v">{PF_CONTEXT_LABELS[p.context]}</span></div>
+        </div>
 
         {(hasItems(p.images) || hasItems(p.videos)) && (
           <div class="pf-gallery">

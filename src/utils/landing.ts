@@ -50,6 +50,7 @@ export interface PortfolioProject {
   platform: string;
   title: string;
   date?: string;
+  client?: string;
   summary: string;
   description?: string;
   specs?: PortfolioSpec[];
