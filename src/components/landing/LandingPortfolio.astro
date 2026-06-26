@@ -6,6 +6,7 @@ import {
   type PortfolioProject,
   type ProjectContext,
 } from '~/utils/landing';
+import { renderMarkdown } from '~/utils/markdown';
 
 interface Props {
   portfolioData: PortfolioData;
@@ -16,6 +17,10 @@ interface Props {
 }
 
 const { portfolioData, projects, contexts, hasExperimental, hasFilters } = Astro.props;
+
+const cards = await Promise.all(
+  projects.map(async (p) => ({ project: p, summaryHtml: await renderMarkdown(p.summary) }))
+);
 ---
 
 <section class="portfolio" id="portfolio" data-screen-label="Portfolio">
@@ -38,7 +43,7 @@ const { portfolioData, projects, contexts, hasExperimental, hasFilters } = Astro
     )}
 
     <div class="pf-grid" id="pfGrid" data-page-size={PF_PAGE_SIZE}>
-      {projects.map((p, i) => (
+      {cards.map(({ project: p, summaryHtml }, i) => (
         <button
           class="pf-card anim-up"
           type="button"
@@ -51,8 +56,9 @@ const { portfolioData, projects, contexts, hasExperimental, hasFilters } = Astro
           <span class="pf-n">{String(i + 1).padStart(2, '0')}</span>
           <div class="pf-card-body">
             <span class="pf-tag">{p.platform}</span>
+            {p.date && <span class="pf-date">{p.date}</span>}
             <span class="pf-name">{p.title}</span>
-            <p class="pf-desc">{p.summary}</p>
+            <div class="pf-desc" set:html={summaryHtml} />
           </div>
           <span class="ar">↗</span>
         </button>

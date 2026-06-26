@@ -328,8 +328,15 @@ body.resume-open .nav{opacity:0;pointer-events:none}
 .pf-n{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--txt-2);padding-top:6px}
 .pf-card-body{flex:1}
 .pf-tag{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver)}
+.pf-date{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);margin-top:6px}
 .pf-name{display:block;font-family:var(--display);font-weight:400;font-size:clamp(22px,2.4vw,30px);color:#fff;letter-spacing:-.01em;margin-top:10px}
 .pf-desc{font-size:14px;font-weight:300;line-height:1.55;color:var(--txt-2);margin-top:10px;max-width:42ch}
+/* rendered markdown inside .pf-desc */
+.pf-desc>*{margin:0}
+.pf-desc>*+*{margin-top:.7em}
+.pf-desc ul,.pf-desc ol{padding-left:1.2em;margin-top:.5em}
+.pf-desc li+li{margin-top:.25em}
+.pf-desc a{color:var(--silver);text-decoration:underline;text-underline-offset:2px}
 .pf-card .ar{color:var(--txt-3);font-size:16px;transition:transform .4s var(--ease),color .4s var(--ease)}
 .pf-card:hover .ar{color:var(--silver);transform:translate(4px,-4px)}
 /* cards are <button>; strip native chrome */
@@ -396,6 +403,12 @@ body.resume-open .nav{opacity:0;pointer-events:none}
   font-size:clamp(28px,4vw,48px);line-height:1}
 .pf-modal-date{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);white-space:nowrap}
 .pf-modal-desc{font-size:clamp(14px,1.5vw,16px);font-weight:300;line-height:1.6;color:var(--txt-2);margin-top:20px;max-width:60ch}
+/* rendered markdown inside .pf-modal-desc */
+.pf-modal-desc>*{margin:0}
+.pf-modal-desc>*+*{margin-top:1em}
+.pf-modal-desc ul,.pf-modal-desc ol{padding-left:1.3em;margin-top:.6em}
+.pf-modal-desc li+li{margin-top:.3em}
+.pf-modal-desc a{color:var(--silver);text-decoration:underline;text-underline-offset:2px}
 
 .pf-specs{margin-top:28px;border-top:1px solid var(--line-2)}
 .pf-spec-row{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:baseline;

@@ -1,15 +1,20 @@
 ---
 import { hasItems, type PortfolioProject } from '~/utils/landing';
+import { renderMarkdown } from '~/utils/markdown';
 
 interface Props {
   projects: PortfolioProject[];
 }
 
 const { projects } = Astro.props;
+
+const panels = await Promise.all(
+  projects.map(async (p) => ({ project: p, descriptionHtml: await renderMarkdown(p.description) }))
+);
 ---
 
 <div class="pf-modal" id="pfModal" role="dialog" aria-modal="true" aria-label="Project details" aria-hidden="true">
-  {projects.map((p) => (
+  {panels.map(({ project: p, descriptionHtml }) => (
     <div class="pf-modal-panel" data-project={p.slug}>
       <span class="br tl"></span><span class="br tr"></span>
       <span class="br bl"></span><span class="br br2"></span>
@@ -20,7 +25,7 @@ const { projects } = Astro.props;
           <h3 class="pf-modal-title" id={`project-title-${p.slug}`}>{p.title}</h3>
           {p.date && <span class="pf-modal-date">{p.date}</span>}
         </div>
-        {p.description && <p class="pf-modal-desc">{p.description}</p>}
+        {descriptionHtml && <div class="pf-modal-desc" set:html={descriptionHtml} />}
 
         {hasItems(p.specs) && (
           <div class="pf-specs">
