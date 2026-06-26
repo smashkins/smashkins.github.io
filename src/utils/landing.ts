@@ -41,7 +41,9 @@ export interface PortfolioSpec {
   value: string;
 }
 
-export type PortfolioVideo = string | { src: string; poster?: string };
+// `src` may be a local path (/assets/...) OR a YouTube/Vimeo watch URL —
+// external URLs are auto-detected and rendered as responsive iframe embeds.
+export type PortfolioVideo = string | { src: string; poster?: string; title?: string };
 
 export interface PortfolioProject {
   slug: string;

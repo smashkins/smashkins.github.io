@@ -1,6 +1,7 @@
 ---
 import { hasItems, PF_CONTEXT_LABELS, type PortfolioProject } from '~/utils/landing';
 import { renderMarkdown } from '~/utils/markdown';
+import { resolveVideo } from '~/utils/video';
 
 interface Props {
   projects: PortfolioProject[];
@@ -41,11 +42,21 @@ const panels = await Promise.all(
               <img src={src} alt={`${p.title} — preview`} loading="lazy" />
             ))}
             {p.videos?.map((v) => {
-              const vsrc = typeof v === 'string' ? v : v.src;
-              const poster = typeof v === 'object' && v ? v.poster : undefined;
-              return (
-                <video class="pf-video" muted loop playsinline controls preload="metadata" poster={poster}>
-                  <source src={vsrc} type="video/mp4" />
+              const rv = resolveVideo(v);
+              return rv.kind === 'embed' ? (
+                <div class="pf-embed">
+                  <iframe
+                    src={rv.url}
+                    title={rv.title ?? `${p.title} — video`}
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              ) : (
+                <video class="pf-video" muted loop playsinline controls preload="metadata" poster={rv.poster}>
+                  <source src={rv.src} type="video/mp4" />
                 </video>
               );
             })}

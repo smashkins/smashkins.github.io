@@ -420,6 +420,9 @@ body.resume-open .nav{opacity:0;pointer-events:none}
 
 .pf-gallery{margin-top:30px;display:flex;flex-direction:column;gap:14px}
 .pf-gallery img,.pf-gallery video{width:100%;height:auto;display:block;border:1px solid var(--line);background:var(--charcoal)}
+/* external (YouTube/Vimeo) embeds — responsive 16:9 */
+.pf-embed{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);background:var(--charcoal)}
+.pf-embed iframe{position:absolute;inset:0;width:100%;height:100%;display:block;border:0}
 
 .pf-modal-links{margin-top:30px;border-top:1px solid var(--line-2)}
 
