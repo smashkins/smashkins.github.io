@@ -13,6 +13,14 @@ const PLAYLIST = 'PLDQmiNJl6F54';
   <button class="bg-player__btn" data-bg-stop type="button" aria-label="Stop background music" title="Stop" disabled>
     <span aria-hidden="true">&#9632;</span>
   </button>
+  <svg class="bg-player__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <!-- three concentric waves (centered at x=4,y=12, radii 7/11/15), drawn
+         first so the filled cone overlaps their inner ends for a clean emerge -->
+    <path d="M9.36 7.5a7 7 0 0 1 0 9" />
+    <path d="M12.43 4.93a11 11 0 0 1 0 14.14" />
+    <path d="M15.49 2.36a15 15 0 0 1 0 19.28" />
+    <polygon points="2 9 6 9 10 5 10 19 6 15 2 15" />
+  </svg>
   <input
     class="bg-player__vol"
     data-bg-vol
@@ -70,7 +78,25 @@ const PLAYLIST = 'PLDQmiNJl6F54';
     border-color: var(--line-2);
   }
 
-  /* volume slider — hairline track, small square thumb */
+  /* speaker glyph — labels the slider as volume; cone filled, waves stroked */
+  .bg-player__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: -2px;
+    color: var(--txt-3);
+    flex: none;
+  }
+  .bg-player__icon polygon {
+    fill: currentColor;
+  }
+  .bg-player__icon path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /* volume slider — wedge track (thin→thick = low→high), small square thumb */
   .bg-player__vol {
     -webkit-appearance: none;
     appearance: none;
@@ -81,19 +107,22 @@ const PLAYLIST = 'PLDQmiNJl6F54';
     cursor: pointer;
   }
   .bg-player__vol::-webkit-slider-runnable-track {
-    height: 1px;
+    height: 8px;
     background: var(--line-2);
+    /* triangle: a sliver at the left growing to full height at the right */
+    clip-path: polygon(0 100%, 100% 0, 100% 100%);
   }
   .bg-player__vol::-moz-range-track {
-    height: 1px;
+    height: 8px;
     background: var(--line-2);
+    clip-path: polygon(0 100%, 100% 0, 100% 100%);
   }
   .bg-player__vol::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 7px;
     height: 7px;
-    margin-top: -3px;
+    margin-top: 1px;
     border-radius: 0;
     background: var(--txt-3);
     transition: background 0.3s var(--ease);
