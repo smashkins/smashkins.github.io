@@ -11,8 +11,8 @@ badge: "MONOIDX"
 
 # Body copy — one entry per paragraph.
 paragraphs:
-  - "MONOIDX is the digital engineering identity of Vincenzo Stira an Apple platform engineer building software for iOS, iPadOS, WatchOS, macOS and visionOS."
-  - "The practice is built on a single principle: clarity through restraint. Every system is designed for longevity, reduced complexity and resilience software that stays invisible and simply works."
+  - "MONOIDX is the digital engineering identity of Vincenzo Stira, an Apple platform engineer building software for iOS, iPadOS, watchOS, macOS and visionOS."
+  - "The practice is built on a single principle: clarity through restraint. Every system is designed for longevity, reduced complexity and resilience—software that stays invisible and simply works."
   - "Today that work is boosted and augmented by Artificial Intelligence. AI accelerates research, architecture and implementation, while the engineering judgment stays human. The result is a workflow that ships faster without trading away craft."
   - "In mathematics, a monoid is the minimal structure you need to compose things reliably. Two rules. No waste. Maximum reuse.
 That's how I approach engineering."
@@ -24,7 +24,7 @@ specs:
   - label: "Focus"
     value: "Apple Platforms"
   - label: "Platforms"
-    value: "iOS · iPadOS · Watch OS · macOS · visionOS"
+    value: "iOS · iPadOS · watchOS · macOS · visionOS"
   - label: "Status"
     value: "Operational"
 ---

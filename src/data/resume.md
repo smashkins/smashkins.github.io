@@ -37,17 +37,17 @@ jobs:
     org: "Employed · OB Science / iMamma"
     note: "Senior iOS engineer on iMamma (1M+ downloads at the time), leading feature expansion and codebase improvements on the existing maternity app. Continued on the same product after Angelini Consumer acquired iMamma and its team in late 2020."
   - role: "Freelance iOS Engineer"
-    period: "2016 - 2024"
+    period: "2016 — 2024"
     org: "VIOinteractive"
-    notes: 
-       - "Shipped Gruppo Romani App (Serenissima, Cir, Cercom, Cerasarda, Isla): MVVM, OneSignal push, Realm DB, Alamofire, universal layout."
-       - "Built prototypes: PBR rendering with SceneKit + Metal (WWDC16); IBM Watson Visual Recognition ML pipeline."
-       - "Independently scoped and delivered iOS apps for multiple clients."
+    notes:
+      - "Shipped Gruppo Romani App (Serenissima, Cir, Cercom, Cerasarda, Isla): MVVM, OneSignal push, Realm DB, Alamofire, universal layout."
+      - "Built prototypes: PBR rendering with SceneKit + Metal (WWDC16); IBM Watson Visual Recognition ML pipeline."
+      - "Independently scoped and delivered iOS apps for multiple clients."
 
 meta:
   # Any row can carry an optional `note:` — a short line rendered in small text,
   # left-aligned below the value.
-  - label: "Community & Leadrship"
+  - label: "Community & Leadership"
     value: "Founder — Swift Italy User Group"
     note: "Founded and ran what was at the time Italy's largest Swift developer community (600+ members across Facebook & YouTube). Organized talks, meetups, and content for the Italian iOS scene."
   - label: "Author"
@@ -62,11 +62,11 @@ skills:
   - category: "Languages"
     items: ["Swift", "Objective-C", "HTML", "CSS", "JavaScript", "SQL"]
   - category: "iOS Frameworks"
-    items: ["SwiftUI", "UIKit", "Combine", "Swift Concurrency", "Core Data", "Swift Data", "Realm", "Cloud Kit", "File Manager", "Metal", "Core Graphics", "Core Animation", "Swift Test", "Apple Intelligence Framework", "Core AI Framework", "SPM", "Cocoapods/Carthage"]
+    items: ["SwiftUI", "UIKit", "Combine", "Swift Concurrency", "Core Data", "Swift Data", "Realm", "CloudKit", "FileManager", "Metal", "Core Graphics", "Core Animation", "Swift Testing", "Apple Intelligence Framework", "Core AI Framework", "SPM", "CocoaPods/Carthage"]
   - category: "Architecture"
     items: ["MVC", "MVVM", "MVI", "Clean Architecture", "Kotlin Multiplatform", "Dependency Injection Patterns"]
   - category: "Tooling & CI/CD"
-    items: ["Fastlane", "GitLab CI", "Firebase", "Git", "Github Actions", "Gitlab Actions", "Xcode Cloud"]
+    items: ["Fastlane", "GitLab CI", "Firebase", "Git", "GitHub Actions", "Xcode Cloud"]
 
 # Meta rows rendered AFTER the Core Skills row.
 metaAfter:
