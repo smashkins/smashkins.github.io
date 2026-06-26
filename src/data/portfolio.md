@@ -155,9 +155,9 @@ projects:
     images: []
     videos:
       # mp4 files under public/assets/portfolio/<slug>/ ; optional `poster` image
-      - src: "/assets/portfolio/vuforiaSDK/2016-Augmented-Reality-Prototype-for-iOS-with-Vuforia-SDK.mp4"
+      - src: "https://www.youtube.com/watch?v=1TlgJfK28zU"
         poster: "/assets/portfolio/vuforiaSDK/VuforiaSDKPoster.jpg"
-      - src: "/assets/portfolio/vuforiaSDK/2016-Augmented-Reality-Prototype-Helicopter-for-iOS-in-Vuforia-SDK.mp4"
+      - src: "https://www.youtube.com/watch?v=9A4sq_GcBuU"
     links: []
   - slug: "project-watson"
     context: "freelance"
@@ -169,6 +169,10 @@ projects:
     summary: "Some experiments conducted way back in 2016 when Apple did not yet have its own AI frameworks but there were some third-party libraries that made it possible to create the first AI prototypes. It wasn't yet the era of LLMs and AI was limited to machine learning and OCR scanning..."
     description: |
       Some experiments conducted way back in 2016 when Apple did not yet have its own AI frameworks but there were some third-party libraries that made it possible to create the first AI prototypes. It wasn't yet the era of LLMs and AI was limited to machine learning and OCR scanning.
+
+      The first video is about IBM Watson AI.
+      The second video is about Vuforia SDK and IBM Watson AI.
+      The third video is about PBR with a fresh new Apple Framework presented at wwdc 2014: The Metal Framework
     specs:
       - label: "Platform"
         value: "iPadOS · iOS"
@@ -177,8 +181,9 @@ projects:
     images: []
     videos:
       # mp4 files under public/assets/portfolio/<slug>/ ; optional `poster` image
-      - src: "/assets/portfolio/watsonai/visual_recognition_ios_with_watson_ibm_sdk_v1(240p).mp4"
-      - src: "/assets/portfolio/watsonai/ios_11_arkit_&_machine_learning_dev_tests_v1 (1080p).mp4"
+      - src: "https://vimeo.com/208121663"
+      - src: "https://vimeo.com/225125811"
+      - src: "https://vimeo.com/184365146"
     links: []
 ---
 
