@@ -102,6 +102,8 @@ projects:
     links:
       - label: "[POC] Community Section"
         href: "https://monoidx.dev/Rosanero-app/Concepts/rosanero-community-concept.html"
+      - label: "[POC] Live News Feed"
+        href: "https://monoidx.dev/Rosanero-app/Concepts/live-news-feed-press.html"
   - slug: "project-snapfood"
     context: "freelance"
     platform: "iOS · UIKit"
