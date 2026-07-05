@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rosanero · Live News Feed — Tutte le notizie sul Palermo, raccontate bene</title>
+<meta name="description" content="Il Live News Feed dell'app Rosanero: la stessa storia in un'unica scheda che si aggiorna a ogni sviluppo, ogni notizia catalogata per categoria e importanza, e una strip live sempre in movimento in home." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Saira+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0509; --bg-2:#0f0710; --bg-3:#150a14;
+    --ink:#fdf2f8;
+    --muted:oklch(0.72 0.035 340); --muted-2:oklch(0.58 0.03 340);
+    --pink:oklch(0.66 0.23 350); --pink-soft:oklch(0.74 0.18 345); --pink-neon:oklch(0.74 0.27 348);
+    --gold:oklch(0.83 0.13 88); --cyan:oklch(0.82 0.12 200); --green:oklch(0.78 0.16 150);
+    --line:rgba(255,255,255,0.09); --line-2:rgba(255,255,255,0.05);
+    --card:rgba(255,255,255,0.025); --card-2:rgba(255,255,255,0.04);
+    --radius:18px; --maxw:1200px;
+    --shadow-glow:0 0 0 1px rgba(255,255,255,0.06), 0 30px 60px -25px rgba(0,0,0,0.9);
+    --font-display:"Archivo", system-ui, sans-serif;
+    --font-cond:"Saira Condensed", system-ui, sans-serif;
+    --font-body:"Manrope", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:
+    radial-gradient(900px 600px at 15% -5%, oklch(0.66 0.23 350 / 0.22), transparent 60%),
+    radial-gradient(800px 700px at 95% 8%, oklch(0.7 0.22 345 / 0.14), transparent 60%),
+    radial-gradient(900px 800px at 80% 100%, oklch(0.82 0.12 200 / 0.08), transparent 55%);}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.35;background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:64px 64px;mask-image:radial-gradient(circle at 50% 30%, black, transparent 80%);}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2;}
+  section{position:relative;z-index:2;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;line-height:1.02;letter-spacing:-0.02em;}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-cond);text-transform:uppercase;letter-spacing:0.22em;font-size:13px;font-weight:600;color:var(--pink-soft);padding:8px 16px;border:1px solid var(--line);border-radius:100px;background:rgba(255,255,255,0.02);backdrop-filter:blur(8px);}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pink-neon);box-shadow:0 0 14px 2px var(--pink-neon);}
+  .eyebrow.gold{color:var(--gold);} .eyebrow.gold::before{background:var(--gold);box-shadow:0 0 14px 2px var(--gold);}
+  .eyebrow.cyan{color:var(--cyan);} .eyebrow.cyan::before{background:var(--cyan);box-shadow:0 0 14px 2px var(--cyan);}
+  .eyebrow.green{color:var(--green);} .eyebrow.green::before{background:var(--green);box-shadow:0 0 14px 2px var(--green);}
+
+  .section-pad{padding:clamp(72px,9vw,140px) 0;}
+  .section-head{max-width:820px;margin-bottom:54px;}
+  .section-head h2{font-size:clamp(34px,5vw,60px);margin:22px 0 18px;}
+  .section-head p{color:var(--muted);font-size:clamp(16px,1.6vw,19px);max-width:640px;}
+  .grad-text{background:linear-gradient(100deg, var(--pink-neon) 0%, var(--pink-soft) 40%, var(--gold) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(18px) saturate(140%);background:linear-gradient(180deg, rgba(10,5,9,0.85), rgba(10,5,9,0.5));border-bottom:1px solid var(--line-2);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-weight:900;letter-spacing:-0.01em;font-size:18px;}
+  .brand .mark{width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--font-cond);font-weight:800;font-size:18px;color:#180410;background:repeating-linear-gradient(135deg, var(--pink-neon) 0 10px, #2a0f22 10px 20px);box-shadow:0 0 22px -4px var(--pink-neon);}
+  .brand small{display:block;font-family:var(--font-cond);font-weight:600;font-size:11px;letter-spacing:0.18em;color:var(--muted-2);text-transform:uppercase;}
+  .nav-links{display:flex;gap:30px;font-size:14px;font-weight:500;color:var(--muted);white-space:nowrap;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;font-size:14px;white-space:nowrap;padding:11px 20px;border-radius:11px;color:#180410;background:linear-gradient(100deg,var(--pink-neon),var(--gold));box-shadow:0 8px 24px -10px var(--pink-neon);transition:transform .2s, box-shadow .2s;}
+  .nav-cta:hover{transform:translateY(-2px);box-shadow:0 14px 30px -10px var(--pink-neon);}
+  @media(max-width:860px){.nav-links{display:none;}}
+
+  .disclaimer{display:flex;gap:14px;align-items:flex-start;border:1px solid oklch(0.83 0.13 88 / 0.4);background:linear-gradient(100deg, oklch(0.83 0.13 88 / 0.1), oklch(0.83 0.13 88 / 0.02));border-radius:14px;padding:16px 20px;font-size:14.5px;color:oklch(0.9 0.06 88);max-width:820px;}
+  .disclaimer .ico{font-size:20px;line-height:1.3;}
+
+  .hero{padding-top:clamp(48px,7vw,90px);padding-bottom:clamp(40px,6vw,80px);}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;}
+  .hero h1{font-size:clamp(42px,6.4vw,86px);margin:24px 0 22px;}
+  .hero p.sub{color:var(--muted);font-size:clamp(17px,1.8vw,21px);max-width:560px;}
+  .hero p.sub b{color:var(--ink);font-weight:600;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px;}
+  .btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;font-size:15px;padding:15px 26px;border-radius:13px;transition:transform .2s,box-shadow .2s,background .2s;cursor:pointer;border:1px solid transparent;}
+  .btn-primary{background:linear-gradient(100deg,var(--pink-neon),var(--gold));color:#180410;box-shadow:0 12px 34px -12px var(--pink-neon);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px var(--pink-neon);}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:rgba(255,255,255,0.03);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.07);transform:translateY(-2px);}
+  .hero-stats{display:flex;gap:30px;margin-top:44px;flex-wrap:wrap;}
+  .hero-stats .hs{display:flex;flex-direction:column;}
+  .hero-stats .num{font-family:var(--font-cond);font-weight:800;font-size:32px;line-height:1;color:var(--ink);}
+  .hero-stats .lbl{font-size:12.5px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted-2);margin-top:6px;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}.hero-card-col{order:-1;}}
+
+  /* mock news card — the living, classified card */
+  .nc-col{display:flex;justify-content:center;perspective:1400px;}
+  .news-card{position:relative;width:min(380px,88vw);border-radius:26px;padding:3px;background:linear-gradient(160deg, var(--gold), var(--pink-neon) 45%, var(--cyan) 100%);box-shadow:0 40px 80px -30px rgba(0,0,0,0.95), 0 0 60px -20px var(--pink-neon);transition:transform .5s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d;}
+  .news-card:hover{transform:rotateY(-6deg) rotateX(3deg) translateY(-6px);}
+  .nc-inner{border-radius:24px;padding:24px 22px 22px;background:radial-gradient(120% 90% at 50% 0%, oklch(0.3 0.12 350 / 0.55), transparent 60%),linear-gradient(180deg, #1c0b18, #0c0510 80%);position:relative;overflow:hidden;}
+  .nc-inner::before{content:"";position:absolute;inset:0;opacity:0.5;background:repeating-linear-gradient(115deg, transparent 0 16px, rgba(255,255,255,0.025) 16px 17px);mask-image:radial-gradient(circle at 50% 25%, black, transparent 75%);}
+  .nc-top{display:flex;justify-content:space-between;align-items:center;position:relative;margin-bottom:16px;gap:8px;}
+  .nc-cat{display:flex;gap:8px;align-items:center;}
+  .nc-tag{font-family:var(--font-cond);font-weight:800;letter-spacing:0.12em;font-size:11px;text-transform:uppercase;color:var(--gold);border:1px solid oklch(0.83 0.13 88 / 0.5);background:oklch(0.83 0.13 88 / 0.1);padding:6px 11px;border-radius:100px;}
+  .nc-imp{font-family:var(--font-cond);font-weight:800;letter-spacing:0.1em;font-size:11px;text-transform:uppercase;color:var(--pink-neon);border:1px solid oklch(0.74 0.27 348 / 0.5);background:oklch(0.66 0.23 350 / 0.14);padding:6px 11px;border-radius:100px;}
+  .nc-live{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-cond);font-weight:700;letter-spacing:0.08em;font-size:11px;text-transform:uppercase;color:var(--green);}
+  .nc-live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px 2px var(--green);animation:pulse 1.6s ease-in-out infinite;}
+  .nc-title{position:relative;font-size:23px;line-height:1.12;margin-bottom:10px;}
+  .nc-context{position:relative;color:var(--muted);font-size:14.5px;margin-bottom:16px;}
+  .nc-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:2px 0 14px;opacity:0.5;}
+  .nc-upd{position:relative;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-cond);font-weight:700;letter-spacing:0.06em;font-size:11.5px;text-transform:uppercase;color:var(--green);margin-bottom:14px;}
+  .nc-upd::before{content:"↻";font-size:14px;}
+  .nc-steps{position:relative;display:flex;flex-direction:column;gap:10px;}
+  .nc-step{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--muted-2);}
+  .nc-step .mk{width:17px;height:17px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:10px;flex:none;}
+  .nc-step.done{color:var(--muted);} .nc-step.done .mk{background:oklch(0.78 0.16 150 / 0.22);border-color:oklch(0.78 0.16 150 / 0.5);color:var(--green);}
+  .nc-step.now{color:var(--ink);font-weight:600;} .nc-step.now .mk{background:linear-gradient(100deg,var(--pink-neon),var(--gold));border-color:transparent;color:#180410;}
+  .nc-glow{position:absolute;inset:-40px;border-radius:50%;background:radial-gradient(circle,var(--pink-neon),transparent 70%);opacity:0.22;filter:blur(40px);z-index:-1;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  /* ---------- LIVE TICKER STRIP ---------- */
+  .ticker{position:relative;overflow:hidden;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);background:linear-gradient(180deg,var(--bg-2),var(--bg));padding:14px 0;
+    -webkit-mask-image:linear-gradient(90deg,transparent,black 9%,black 91%,transparent);mask-image:linear-gradient(90deg,transparent,black 9%,black 91%,transparent);}
+  .ticker-live{position:absolute;left:0;top:0;bottom:0;z-index:3;display:flex;align-items:center;gap:9px;padding:0 22px 0 24px;font-family:var(--font-cond);font-weight:800;letter-spacing:0.16em;font-size:13px;text-transform:uppercase;color:var(--pink-neon);background:linear-gradient(90deg,var(--bg) 55%,transparent);}
+  .ticker-live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pink-neon);box-shadow:0 0 12px 2px var(--pink-neon);animation:pulse 1.6s ease-in-out infinite;}
+  .ticker-track{display:flex;width:max-content;animation:ticker 46s linear infinite;}
+  .ticker:hover .ticker-track{animation-play-state:paused;}
+  @keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .tk{display:inline-flex;align-items:center;gap:11px;padding:0 26px;white-space:nowrap;font-size:14.5px;color:var(--muted);border-right:1px solid var(--line-2);}
+  .tk b{color:var(--ink);font-weight:600;}
+  .tk .tg{font-family:var(--font-cond);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);}
+  .tk .tg.pink{color:var(--pink-soft);} .tk .tg.cyan{color:var(--cyan);} .tk .tg.green{color:var(--green);}
+
+  .card{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--card-2),var(--card));padding:26px;transition:transform .25s, border-color .25s, box-shadow .25s;overflow:hidden;}
+  .card:hover{transform:translateY(-5px);border-color:oklch(0.66 0.23 350 / 0.45);box-shadow:0 24px 50px -28px var(--pink-neon);}
+  .card .ico-chip{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;font-size:24px;margin-bottom:18px;background:radial-gradient(circle at 30% 25%, oklch(0.66 0.23 350 / 0.35), oklch(0.2 0.08 340 / 0.3));border:1px solid var(--line);}
+  .card h3{font-size:20px;margin-bottom:8px;}
+  .card p{color:var(--muted);font-size:14.5px;}
+  .card p b{color:var(--ink);font-weight:600;}
+  .card-grid{display:grid;gap:18px;}
+  .cols-2{grid-template-columns:repeat(2,1fr);}
+  .cols-3{grid-template-columns:repeat(3,1fr);}
+  @media(max-width:960px){.cols-3{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:580px){.cols-2,.cols-3{grid-template-columns:1fr;}}
+
+  .band{background:linear-gradient(180deg,var(--bg-2),var(--bg));border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);}
+  .band-2{background:radial-gradient(1000px 500px at 80% 0%, oklch(0.2 0.09 350 / 0.4), transparent 60%), var(--bg);}
+
+  /* problem: before / after */
+  .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:stretch;}
+  @media(max-width:820px){.ba-grid{grid-template-columns:1fr;}}
+  .ba{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:linear-gradient(180deg,var(--card-2),var(--card));}
+  .ba h3{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .ba.before h3{color:var(--muted);} .ba.after h3{color:var(--pink-soft);}
+  .dup{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);padding:9px 12px;border:1px solid var(--line-2);border-radius:10px;margin-bottom:9px;background:rgba(255,255,255,0.015);}
+  .dup .num{font-family:var(--font-cond);font-weight:700;font-size:12px;color:var(--muted-2);flex:none;width:20px;}
+  .ba.after .one{border:1px solid oklch(0.66 0.23 350 / 0.4);background:linear-gradient(100deg, oklch(0.66 0.23 350 / 0.12), transparent);border-radius:12px;padding:16px;}
+  .ba.after .one .t{font-family:var(--font-display);font-weight:800;font-size:16px;margin-bottom:6px;}
+  .ba.after .one .m{font-size:13px;color:var(--muted);margin-bottom:12px;}
+  .ba.after .one .cov{display:inline-flex;gap:7px;align-items:center;font-family:var(--font-cond);font-weight:800;font-size:12px;letter-spacing:0.05em;color:var(--cyan);}
+
+  /* categories chips */
+  .cat-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+  .cat-chip{font-family:var(--font-cond);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;font-size:13px;padding:9px 15px;border-radius:100px;border:1px solid var(--line);background:rgba(255,255,255,0.02);color:var(--muted);}
+  .cat-chip b{color:var(--ink);font-weight:800;}
+
+  /* how it works */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:s;}
+  @media(max-width:900px){.steps{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.steps{grid-template-columns:1fr;}}
+  .step{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;background:linear-gradient(180deg,var(--card-2),var(--card));}
+  .step .n{counter-increment:s;font-family:var(--font-cond);font-weight:800;font-size:15px;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#180410;background:linear-gradient(100deg,var(--pink-neon),var(--gold));margin-bottom:16px;}
+  .step .n::before{content:"0" counter(s);}
+  .step h3{font-size:17px;margin-bottom:7px;}
+  .step p{color:var(--muted);font-size:14px;}
+
+  /* closing */
+  .closing{text-align:center;border:1px solid var(--line);border-radius:26px;padding:clamp(40px,6vw,72px) 28px;background:radial-gradient(700px 340px at 50% 0%, oklch(0.66 0.23 350 / 0.22), transparent 65%), linear-gradient(180deg,var(--card-2),var(--card));box-shadow:var(--shadow-glow);}
+  .closing h2{font-size:clamp(32px,5vw,58px);margin:20px auto 18px;max-width:16ch;}
+  .closing p{color:var(--muted);max-width:560px;margin:0 auto 30px;font-size:17px;}
+
+  footer{border-top:1px solid var(--line-2);padding:44px 0 60px;}
+  .foot-inner{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center;}
+  .foot-inner p{color:var(--muted-2);font-size:13.5px;}
+  .foot-links{display:flex;gap:24px;font-size:13.5px;color:var(--muted);}
+  .foot-links a:hover{color:var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{animation:none;}
+    .nc-live::before,.ticker-live::before{animation:none;}
+    .news-card{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="mark">R</span>
+      <span>Rosanero<small>Live News Feed</small></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#cose">Cos'è</a>
+      <a href="#differenza">La differenza</a>
+      <a href="#funzioni">Funzioni</a>
+      <a href="#come">Come funziona</a>
+    </nav>
+    <a href="#come" class="nav-cta">Scopri di più</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero wrap" id="cose">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Nuova funzione · Live News Feed</span>
+      <h1>Tutte le notizie sul Palermo. <span class="grad-text">Una sola volta, raccontate bene.</span></h1>
+      <p class="sub">Il Live News Feed dell'app Rosanero riordina le notizie del Palermo per te: <b>niente doppioni</b>, la stessa storia in <b>un'unica scheda che si aggiorna a ogni sviluppo</b>, e ogni notizia <b>catalogata per categoria e importanza</b>.</p>
+      <div class="cta-row">
+        <a href="#differenza" class="btn btn-primary">Vedi la differenza</a>
+        <a href="#come" class="btn btn-ghost">Come funziona</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><span class="num">1</span><span class="lbl">Scheda per storia</span></div>
+        <div class="hs"><span class="num">~3 min</span><span class="lbl">Aggiornamento</span></div>
+        <div class="hs"><span class="num">6</span><span class="lbl">Categorie</span></div>
+        <div class="hs"><span class="num">Live</span><span class="lbl">Strip in home</span></div>
+      </div>
+    </div>
+    <div class="hero-card-col nc-col">
+      <div class="news-card">
+        <div class="nc-glow"></div>
+        <div class="nc-inner">
+          <div class="nc-top">
+            <div class="nc-cat">
+              <span class="nc-tag">Mercato</span>
+              <span class="nc-imp">Principale</span>
+            </div>
+            <span class="nc-live">Live</span>
+          </div>
+          <h3 class="nc-title">Ufficiale: Tommaso Cassandro è del Palermo</h3>
+          <p class="nc-context">Definito il contratto di quattro anni e scelto il numero di maglia.</p>
+          <div class="nc-line"></div>
+          <div class="nc-upd">Aggiornata 3 volte oggi</div>
+          <div class="nc-steps">
+            <div class="nc-step done"><span class="mk">✓</span>Trattativa avviata</div>
+            <div class="nc-step done"><span class="mk">✓</span>Visite mediche</div>
+            <div class="nc-step now"><span class="mk">●</span>Ufficiale · ultimo sviluppo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:clamp(34px,5vw,56px);">
+    <div class="disclaimer">
+      <span class="ico">✦</span>
+      <span><b>Progetto indipendente dei tifosi.</b> Rosanero è un'app non ufficiale, non affiliata al Palermo F.C. Il feed cura le notizie del mondo rosanero in una sintesi fedele, senza ripubblicare gli articoli integrali.</span>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE TICKER -->
+<div class="ticker" aria-label="Striscia notizie live">
+  <span class="ticker-live">Live</span>
+  <div class="ticker-track">
+    <span class="tk"><span class="tg">Mercato</span> <b>Ufficiale: Cassandro è del Palermo</b></span>
+    <span class="tk"><span class="tg pink">Mercato</span> <b>Estévez è rosanero, è fatta</b></span>
+    <span class="tk"><span class="tg cyan">Società</span> <b>Nuovo partner per il club</b></span>
+    <span class="tk"><span class="tg">Mercato</span> <b>Avanti per Compagnon: affare in chiusura</b></span>
+    <span class="tk"><span class="tg green">Ritiro</span> <b>Amichevole: le ultime dal campo</b></span>
+    <span class="tk"><span class="tg pink">Formazione</span> <b>Rinnovo: Joronen resta in rosanero</b></span>
+    <!-- duplicate for seamless loop -->
+    <span class="tk"><span class="tg">Mercato</span> <b>Ufficiale: Cassandro è del Palermo</b></span>
+    <span class="tk"><span class="tg pink">Mercato</span> <b>Estévez è rosanero, è fatta</b></span>
+    <span class="tk"><span class="tg cyan">Società</span> <b>Nuovo partner per il club</b></span>
+    <span class="tk"><span class="tg">Mercato</span> <b>Avanti per Compagnon: affare in chiusura</b></span>
+    <span class="tk"><span class="tg green">Ritiro</span> <b>Amichevole: le ultime dal campo</b></span>
+    <span class="tk"><span class="tg pink">Formazione</span> <b>Rinnovo: Joronen resta in rosanero</b></span>
+  </div>
+</div>
+
+<!-- PROBLEM: before / after -->
+<section class="section-pad band" id="differenza">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow gold">Il problema</span>
+      <h2>La stessa notizia, <span class="grad-text">moltiplicata per dieci</span>.</h2>
+      <p>La stessa notizia — un acquisto, un rinnovo — ti arriva decine di volte con titoli diversi, e per capire come si evolve devi ricominciare da capo ogni giorno.</p>
+    </div>
+    <div class="ba-grid">
+      <div class="ba before">
+        <h3>😵‍💫 Prima — il feed di sempre</h3>
+        <div class="dup"><span class="num">1</span> Ufficiale: Cassandro è un nuovo giocatore</div>
+        <div class="dup"><span class="num">2</span> Tommaso Cassandro è del Palermo / Ufficiale</div>
+        <div class="dup"><span class="num">3</span> Chi è Tommaso Cassandro, il difensore</div>
+        <div class="dup"><span class="num">4</span> Ecco Cassandro dal Como: le cifre</div>
+        <div class="dup"><span class="num">5</span> Domani le visite mediche di Cassandro</div>
+        <div class="dup"><span class="num">6</span> Cassandro-Palermo, ci siamo</div>
+        <p style="color:var(--muted-2);font-size:13px;margin-top:12px;">Sei schede diverse. Una sola notizia. E domani cambia di nuovo.</p>
+      </div>
+      <div class="ba after">
+        <h3>✨ Dopo — con il Live News Feed</h3>
+        <div class="one">
+          <div class="t">Ufficiale: Tommaso Cassandro è del Palermo</div>
+          <div class="m">Definito il contratto di quattro anni e scelto il numero di maglia.</div>
+          <span class="cov">🔄 Una scheda che si aggiorna · 🏷️ Mercato · Principale</span>
+        </div>
+        <p style="color:var(--muted);font-size:13.5px;margin-top:16px;">Una sola scheda, <b style="color:var(--ink)">che si aggiorna a ogni sviluppo</b> e apre sempre con l'ultima novità: dalla trattativa alle visite mediche fino all'ufficialità.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section-pad" id="funzioni">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Cosa fa per te</span>
+      <h2>Un feed che <span class="grad-text">ragiona come un tifoso</span>.</h2>
+      <p>Non un elenco di titoli, ma le notizie del Palermo riordinate con criterio — pensate per farti capire tutto in un colpo d'occhio.</p>
+    </div>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="ico-chip">🎯</div>
+        <h3>Una notizia, una scheda</h3>
+        <p>Tutti gli articoli sullo stesso fatto vengono riconosciuti e riuniti in un'unica scheda. Basta scorrere dieci volte lo stesso titolo.</p>
+      </div>
+      <div class="card">
+        <div class="ico-chip">🔄</div>
+        <h3>La scheda che si aggiorna</h3>
+        <p>La scheda è <b>viva</b>: quando esce un nuovo sviluppo — dalla trattativa alle visite mediche fino alla firma — <b>la stessa scheda si aggiorna</b> e apre con l'ultima novità. Segui la storia senza perdere il filo, senza doppioni che ricominciano ogni volta da zero.</p>
+      </div>
+      <div class="card">
+        <div class="ico-chip">🏷️</div>
+        <h3>Ogni notizia catalogata</h3>
+        <p>Un <b>sistema di classificazione</b> assegna a ogni notizia una categoria — mercato, formazione, infortuni, risultati, società — e un <b>livello di importanza</b>. Trovi al volo ciò che ti interessa e distingui l'ufficialità dalla semplice voce.</p>
+      </div>
+      <div class="card">
+        <div class="ico-chip">⭐</div>
+        <h3>Le più importanti in cima</h3>
+        <p>Le schede sono ordinate per <b>importanza e freschezza</b>: l'ufficialità di oggi vince sul rumore, le voci non confermate restano in secondo piano.</p>
+      </div>
+      <div class="card">
+        <div class="ico-chip">📟</div>
+        <h3>Strip live in home</h3>
+        <p>In home una <b>striscia live scorre da sola</b> e si aggiorna in automatico: un colpo d'occhio sulle ultime dal mondo rosanero, sempre in movimento, senza dover cercare.</p>
+      </div>
+      <div class="card">
+        <div class="ico-chip">✍️</div>
+        <h3>Riassunto fedele in italiano</h3>
+        <p>Ogni scheda ha una sintesi chiara in italiano che usa <b>solo i fatti realmente riportati</b> — nessuna aggiunta, nessuna invenzione.</p>
+      </div>
+    </div>
+    <div class="cat-chips">
+      <span class="cat-chip"><b>🏷️ Categorie:</b></span>
+      <span class="cat-chip">Mercato</span>
+      <span class="cat-chip">Formazione</span>
+      <span class="cat-chip">Infortuni</span>
+      <span class="cat-chip">Risultati</span>
+      <span class="cat-chip">Società</span>
+      <span class="cat-chip">Altro</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-pad band-2" id="come">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow cyan">Come funziona</span>
+      <h2>Dietro le quinte, <span class="grad-text">in quattro passi</span>.</h2>
+      <p>Un processo automatico che lavora una volta per tutti i tifosi — così l'app resta leggera e il feed sempre pulito e aggiornato.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n"></div>
+        <h3>Raccoglie</h3>
+        <p>Legge in continuazione le notizie sul Palermo e tiene solo ciò che riguarda davvero i rosanero.</p>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <h3>Riconosce la storia</h3>
+        <p>Capisce di chi e di cosa parla ogni articolo e raggruppa quelli che raccontano lo stesso fatto in un'unica scheda.</p>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <h3>Cataloga e sintetizza</h3>
+        <p>Assegna categoria e livello di importanza, poi scrive un riassunto fedele in italiano guidato dall'ultimo sviluppo.</p>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <h3>Aggiorna in tempo reale</h3>
+        <p>Quando escono novità la scheda si aggiorna da sola, le più importanti salgono in cima e alimentano la strip live in home.</p>
+      </div>
+    </div>
+    <div style="margin-top:40px;">
+      <div class="disclaimer">
+        <span class="ico">🎯</span>
+        <span><b>Sintesi fedele, zero invenzioni.</b> Il riassunto usa soltanto i fatti realmente riportati: nessun dettaglio aggiunto. E la classificazione lo dice a colpo d'occhio — una notizia confermata è marcata come "principale", una semplice voce resta "minore".</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="section-pad">
+  <div class="wrap">
+    <div class="closing">
+      <span class="eyebrow green">Il Palermo, in un colpo d'occhio</span>
+      <h2>Meno rumore. <span class="grad-text">Più Palermo.</span></h2>
+      <p>Il Live News Feed è la prima delle funzioni che stiamo costruendo per l'app Rosanero: la casa digitale dei tifosi rosanero, fatta da tifosi.</p>
+      <div class="cta-row" style="justify-content:center;">
+        <a href="#cose" class="btn btn-primary">Torna su</a>
+        <a href="https://monoidx.dev" class="btn btn-ghost">monoidx.dev</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <p>© Rosanero — progetto indipendente dei tifosi. App non ufficiale, non affiliata al Palermo F.C.<br/>Notizie del mondo rosanero curate e sintetizzate fedelmente.</p>
+    <div class="foot-links">
+      <a href="#cose">Cos'è</a>
+      <a href="#differenza">La differenza</a>
+      <a href="#funzioni">Funzioni</a>
+      <a href="#come">Come funziona</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
